@@ -91,7 +91,7 @@ fun ConnectionCheckScreen(viewModel: ConnectionCheckViewModel, onBackClick: () -
             when {
                 result == null && isLoading -> Text(stringResource(R.string.check_running))
                 state.failed || geo == null -> Text(stringResource(R.string.check_failed))
-                else -> ResultCards(result!!, geo)
+                else -> ResultCards(result!!, geo!!)
             }
 
             Button(
