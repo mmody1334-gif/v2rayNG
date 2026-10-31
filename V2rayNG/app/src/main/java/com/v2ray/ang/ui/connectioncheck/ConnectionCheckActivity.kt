@@ -1,7 +1,9 @@
 package com.v2ray.ang.ui.connectioncheck
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.webkit.WebView
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -158,6 +162,17 @@ private fun ResultCards(result: ConnectionCheckResult, geo: IpGeoInfo) {
             title = stringResource(if (match) R.string.check_tz_ok else R.string.check_tz_bad),
             body = stringResource(R.string.check_tz_body, result.phoneTimezone, geo.timezone ?: "?")
         )
+        if (!match) {
+            val context = LocalContext.current
+            OutlinedButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(Intent(Settings.ACTION_DATE_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.check_open_time_settings, geo.timezone ?: "")) }
+        }
     }
     val ipv6Ok = result.ipv6 != Ipv6Status.Leaking
     StatusCard(

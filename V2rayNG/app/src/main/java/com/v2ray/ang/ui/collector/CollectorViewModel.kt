@@ -126,6 +126,14 @@ class CollectorViewModel(application: Application) : BaseViewModel(application) 
         val locale = localizedContext.resources.configuration.locales[0] ?: Locale.getDefault()
         val items = withContext(Dispatchers.Default) {
             buildList {
+                d.files?.get("clean")?.takeIf { it > 0 }?.let {
+                    add(CollectorItemUi("clean.txt", CollectorSection.Quick, "🏠",
+                        getString(R.string.collector_clean), it, null, "clean.txt" in existing))
+                }
+                d.files?.get("gulf4")?.takeIf { it > 0 }?.let {
+                    add(CollectorItemUi("gulf4.txt", CollectorSection.Quick, "🕓",
+                        getString(R.string.collector_gulf4), it, null, "gulf4.txt" in existing))
+                }
                 d.files?.get("fast")?.let {
                     add(CollectorItemUi("fast.txt", CollectorSection.Quick, "⚡",
                         getString(R.string.collector_fastest), it, null, "fast.txt" in existing))

@@ -611,7 +611,7 @@
     <string name="check_clean_body">It is not listed as a VPN, proxy or datacenter address.</string>
     <string name="check_tz_ok">Phone time zone matches the IP</string>
     <string name="check_tz_bad">Phone time zone does not match the IP</string>
-    <string name="check_tz_body">Phone: %1$s · IP: %2$s. Sites compare these to spot VPNs; set the phone time zone to the server's country to hide it.</string>
+    <string name="check_tz_body">Phone: %1$s · IP: %2$s. Sites compare these to spot VPNs; set the phone time zone to the server\'s country to hide it.</string>
     <string name="check_ipv6_none">No IPv6 on this network</string>
     <string name="check_ipv6_protected">IPv6 is protected</string>
     <string name="check_ipv6_leak">IPv6 is leaking your real location!</string>
@@ -619,5 +619,8 @@
     <string name="check_ipv6_real">Your real IPv6: %1$s</string>
     <string name="check_ipv6_no_address">Your network gave no public IPv6 address.</string>
     <string name="check_block_ipv6">Block IPv6 leak</string>
-    <string name="check_block_ipv6_summary">Send IPv6 through the VPN too so it can't reveal your location. Applies on next connect.</string>
+    <string name="check_block_ipv6_summary">Send IPv6 through the VPN too so it can\'t reveal your location. Applies on next connect.</string>
+    <string name="collector_clean">Clean IPs (not listed as VPN)</string>
+    <string name="collector_gulf4">Same time zone as Oman (UAE/Oman)</string>
+    <string name="check_open_time_settings">Open time settings (set to %1$s)</string>
 </resources>

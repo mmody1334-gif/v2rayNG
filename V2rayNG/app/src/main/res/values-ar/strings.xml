@@ -627,4 +627,7 @@
     <string name="check_ipv6_no_address">شبكتك مش مدياك IPv6 عام.</string>
     <string name="check_block_ipv6">منع تسريب IPv6</string>
     <string name="check_block_ipv6_summary">يعدّي الـ IPv6 كمان من الـ VPN عشان ميكشفش مكانك. بيتطبق مع الاتصال الجاي.</string>
+    <string name="collector_clean">IP نظيف (مش متسجل VPN)</string>
+    <string name="collector_gulf4">نفس توقيت عُمان (الإمارات/عُمان)</string>
+    <string name="check_open_time_settings">افتح إعدادات التوقيت (خليه %1$s)</string>
 </resources>
