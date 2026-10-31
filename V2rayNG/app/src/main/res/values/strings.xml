@@ -590,4 +590,34 @@
     <string name="collector_retry">Retry</string>
     <string name="collector_unknown_country">Unknown</string>
     <string name="collector_stats">%1$d working servers from %2$d countries</string>
+    <!-- connection check -->
+    <string name="check_title">Connection check &amp; IP location</string>
+    <string name="check_running">Checking…</string>
+    <string name="check_failed">Could not reach the location service. Check your internet and try again.</string>
+    <string name="check_again">Check again</string>
+    <string name="check_vpn_on">VPN is working</string>
+    <string name="check_vpn_off">VPN is not active</string>
+    <string name="check_vpn_off_body">Websites see your real address below. Connect a server and check again.</string>
+    <string name="check_real_ip">Your real address %1$s (%2$s) is hidden.</string>
+    <string name="check_sites_see">What websites see</string>
+    <string name="check_ip">IP</string>
+    <string name="check_city">City</string>
+    <string name="check_isp">Provider</string>
+    <string name="check_asn">Network (ASN)</string>
+    <string name="check_timezone">Time zone</string>
+    <string name="check_flagged">This IP is flagged as VPN / datacenter</string>
+    <string name="check_flagged_body">Sites that block VPNs will likely detect it. Free servers are almost always datacenter IPs; try another server.</string>
+    <string name="check_clean">This IP looks like a normal connection</string>
+    <string name="check_clean_body">It is not listed as a VPN, proxy or datacenter address.</string>
+    <string name="check_tz_ok">Phone time zone matches the IP</string>
+    <string name="check_tz_bad">Phone time zone does not match the IP</string>
+    <string name="check_tz_body">Phone: %1$s · IP: %2$s. Sites compare these to spot VPNs; set the phone time zone to the server's country to hide it.</string>
+    <string name="check_ipv6_none">No IPv6 on this network</string>
+    <string name="check_ipv6_protected">IPv6 is protected</string>
+    <string name="check_ipv6_leak">IPv6 is leaking your real location!</string>
+    <string name="check_ipv6_not_connected">IPv6 not checked (VPN is off)</string>
+    <string name="check_ipv6_real">Your real IPv6: %1$s</string>
+    <string name="check_ipv6_no_address">Your network gave no public IPv6 address.</string>
+    <string name="check_block_ipv6">Block IPv6 leak</string>
+    <string name="check_block_ipv6_summary">Send IPv6 through the VPN too so it can't reveal your location. Applies on next connect.</string>
 </resources>

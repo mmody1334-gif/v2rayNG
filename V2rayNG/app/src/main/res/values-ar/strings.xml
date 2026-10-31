@@ -597,4 +597,34 @@
     <string name="collector_retry">حاول تاني</string>
     <string name="collector_unknown_country">غير معروف</string>
     <string name="collector_stats">%1$d سيرفر شغال من %2$d دولة</string>
+    <!-- connection check -->
+    <string name="check_title">فحص الاتصال ومكان الـ IP</string>
+    <string name="check_running">جاري الفحص…</string>
+    <string name="check_failed">معرفتش أوصل لخدمة تحديد المكان. اتأكد من النت وجرب تاني.</string>
+    <string name="check_again">افحص تاني</string>
+    <string name="check_vpn_on">الـ VPN شغال</string>
+    <string name="check_vpn_off">الـ VPN مش شغال</string>
+    <string name="check_vpn_off_body">المواقع شايفة عنوانك الحقيقي اللي تحت. اتصل بسيرفر وافحص تاني.</string>
+    <string name="check_real_ip">عنوانك الحقيقي %1$s (%2$s) مستخبي.</string>
+    <string name="check_sites_see">اللي المواقع شايفاه</string>
+    <string name="check_ip">الـ IP</string>
+    <string name="check_city">المدينة</string>
+    <string name="check_isp">الشركة</string>
+    <string name="check_asn">الشبكة (ASN)</string>
+    <string name="check_timezone">المنطقة الزمنية</string>
+    <string name="check_flagged">الـ IP ده متسجل إنه VPN / داتا سنتر</string>
+    <string name="check_flagged_body">المواقع اللي بتمنع الـ VPN هتكشفه غالباً. السيرفرات المجانية كلها تقريباً داتا سنتر، جرب سيرفر تاني.</string>
+    <string name="check_clean">الـ IP ده شكله اتصال عادي</string>
+    <string name="check_clean_body">مش متسجل إنه VPN أو بروكسي أو داتا سنتر.</string>
+    <string name="check_tz_ok">توقيت الموبايل مطابق لدولة الـ IP</string>
+    <string name="check_tz_bad">توقيت الموبايل مش مطابق لدولة الـ IP</string>
+    <string name="check_tz_body">الموبايل: %1$s · الـ IP: %2$s. المواقع بتقارنهم عشان تكشف الـ VPN، غيّر توقيت الموبايل لدولة السيرفر عشان تخفيه.</string>
+    <string name="check_ipv6_none">مفيش IPv6 على الشبكة دي</string>
+    <string name="check_ipv6_protected">الـ IPv6 محمي</string>
+    <string name="check_ipv6_leak">الـ IPv6 بيسرّب مكانك الحقيقي!</string>
+    <string name="check_ipv6_not_connected">الـ IPv6 متفحصش (الـ VPN مقفول)</string>
+    <string name="check_ipv6_real">الـ IPv6 الحقيقي بتاعك: %1$s</string>
+    <string name="check_ipv6_no_address">شبكتك مش مدياك IPv6 عام.</string>
+    <string name="check_block_ipv6">منع تسريب IPv6</string>
+    <string name="check_block_ipv6_summary">يعدّي الـ IPv6 كمان من الـ VPN عشان ميكشفش مكانك. بيتطبق مع الاتصال الجاي.</string>
 </resources>

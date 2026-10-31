@@ -90,6 +90,7 @@ object AppConfig {
     const val PREF_AUTO_SORT_AFTER_TEST = "pref_auto_sort_after_test"
     const val PREF_REAL_PING_CONCURRENCY = "pref_real_ping_concurrency"
     const val PREF_COLLECTOR_AUTO_CLEAN = "pref_collector_auto_clean"
+    const val PREF_BLOCK_IPV6_LEAK = "pref_block_ipv6_leak"
     const val PREF_COLLECTOR_AUTO_CLEAN_LAST = "pref_collector_auto_clean_last"
 
     /** v2-collector published lists (GitHub "subs" branch). */

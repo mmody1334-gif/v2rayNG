@@ -287,6 +287,15 @@ object SettingsManager {
      * Get the HTTP port.
      * @return The HTTP port.
      */
+    /**
+     * Whether the VPN interface takes IPv6 traffic. Without IPv6 routes, IPv6 connections of
+     * other apps leave through the carrier directly and reveal the real location, so IPv6 is
+     * captured (and sent through the core) unless the user disables leak blocking.
+     */
+    fun vpnCapturesIpv6(): Boolean =
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_IPV6_ENABLED) ||
+                MmkvManager.decodeSettingsBool(AppConfig.PREF_BLOCK_IPV6_LEAK, true)
+
     fun getHttpPort(): Int {
         return getSocksPort() + if (Utils.isXray()) 0 else 1
     }

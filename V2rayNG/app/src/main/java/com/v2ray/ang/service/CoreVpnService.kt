@@ -214,8 +214,8 @@ class CoreVpnService : VpnService(), ServiceControl {
             builder.addRoute("0.0.0.0", 0)
         }
 
-        // Configure IPv6 if enabled
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_IPV6_ENABLED) == true) {
+        // Configure IPv6 if enabled, or capture it anyway to stop IPv6 leaking past the VPN
+        if (SettingsManager.vpnCapturesIpv6()) {
             builder.addAddress(vpnConfig.ipv6Client, 126)
             if (bypassLan) {
                 builder.addRoute("2000::", 3) // Currently only 1/8 of total IPv6 is in use
