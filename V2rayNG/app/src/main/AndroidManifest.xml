@@ -157,6 +157,9 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.collector.CollectorActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.subscription.SubEditActivity"
             android:windowSoftInputMode="stateUnchanged|adjustResize"
             android:exported="false" />

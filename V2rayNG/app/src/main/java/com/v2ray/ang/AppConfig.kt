@@ -89,6 +89,11 @@ object AppConfig {
     const val PREF_AUTO_REMOVE_INVALID_AFTER_TEST = "pref_auto_remove_invalid_after_test"
     const val PREF_AUTO_SORT_AFTER_TEST = "pref_auto_sort_after_test"
     const val PREF_REAL_PING_CONCURRENCY = "pref_real_ping_concurrency"
+    const val PREF_COLLECTOR_AUTO_CLEAN = "pref_collector_auto_clean"
+    const val PREF_COLLECTOR_AUTO_CLEAN_LAST = "pref_collector_auto_clean_last"
+
+    /** v2-collector published lists (GitHub "subs" branch). */
+    const val COLLECTOR_BASE_URL = "https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/"
 
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"

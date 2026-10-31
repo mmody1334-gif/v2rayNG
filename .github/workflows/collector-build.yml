@@ -1,0 +1,114 @@
+name: Build Servrati APK
+
+# Builds the personal "سيرفراتي" variant (package com.v2ray.ang.collector) and publishes
+# the APKs to the "app-latest" release so they can be downloaded straight from the phone.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collector-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --channel=0 --install "ndk;30.0.16248370"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/30.0.16248370" >> $GITHUB_ENV
+          sed -i '10i\
+          \
+              ndkVersion = "30.0.16248370"' V2rayNG/app/build.gradle.kts
+
+      - name: Restore cached libhevtun
+        id: hev
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/libs
+          key: libhevtun-${{ runner.os }}-${{ hashFiles('.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('compile-hevtun.sh') }}
+
+      - name: Build libhevtun
+        if: steps.hev.outputs.cache-hit != 'true'
+        run: bash compile-hevtun.sh
+
+      - name: Copy libhevtun
+        run: cp -r libs V2rayNG/app
+
+      - name: Download libv2ray.aar (matching AndroidLibXrayLite submodule)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=$(git -C AndroidLibXrayLite describe --tags --abbrev=0)
+          echo "AndroidLibXrayLite tag: $TAG"
+          mkdir -p V2rayNG/app/libs
+          gh release download "$TAG" -R 2dust/AndroidLibXrayLite -p libv2ray.aar -D V2rayNG/app/libs --clobber
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # Stable signing key from the repo secrets (so updates install over the old version).
+      # Without the secrets a throwaway key is generated, and updating needs an uninstall.
+      - name: Prepare signing key
+        env:
+          KS_B64: ${{ secrets.APP_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.APP_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/app.jks"
+            echo "KS_PASS=$KS_PASS" >> $GITHUB_ENV
+          else
+            echo "::warning::APP_KEYSTORE_BASE64 / APP_KEYSTORE_PASSWORD secrets missing - using a temporary key"
+            P=$(openssl rand -hex 16)
+            echo "::add-mask::$P"
+            keytool -genkeypair -keystore "$RUNNER_TEMP/app.jks" -alias collector -keyalg RSA -keysize 2048 \
+              -validity 36500 -storepass "$P" -keypass "$P" -dname "CN=Servrati"
+            echo "KS_PASS=$P" >> $GITHUB_ENV
+          fi
+
+      - name: Build APK
+        working-directory: V2rayNG
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          chmod 755 gradlew
+          ./gradlew assemblePlaystoreRelease \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/app.jks" \
+            -Pandroid.injected.signing.store.password="$KS_PASS" \
+            -Pandroid.injected.signing.key.alias=collector \
+            -Pandroid.injected.signing.key.password="$KS_PASS"
+
+      - name: Publish to "app-latest" release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p out
+          for f in V2rayNG/app/build/outputs/apk/playstore/release/*.apk; do
+            abi=$(basename "$f" .apk | sed 's/.*_//')
+            cp "$f" "out/Servrati_${abi}.apk"
+          done
+          ls -la out
+          gh release delete app-latest -y --cleanup-tag -R "$GITHUB_REPOSITORY" || true
+          gh release create app-latest out/*.apk -R "$GITHUB_REPOSITORY" \
+            --title "سيرفراتي — آخر نسخة" \
+            --notes "Built from ${GITHUB_SHA::7} on $(date -u '+%Y-%m-%d %H:%M UTC'). Most phones: Servrati_arm64-v8a.apk (or Servrati_universal.apk if unsure)." \
+            --target "$GITHUB_SHA"

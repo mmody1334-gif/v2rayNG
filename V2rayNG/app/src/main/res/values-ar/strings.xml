@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">v2rayNG</string>
+    <string name="app_name" translatable="false">سيرفراتي</string>
     <string name="app_widget_name">التبديل</string>
     <string name="app_tile_name">التبديل</string>
     <string name="app_tile_first_use">أول استخدام لهذه الميزة، يرجى استخدام التطبيق لإضافة خادم</string>
@@ -572,4 +572,29 @@
     <string name="sub_info_open_page">فتح صفحة معلومات الاشتراك</string>
     <string name="sub_info_unlimited">غير محدود</string>
 
+
+    <!-- v2-collector -->
+    <string name="collector_title">سيرفرات مجانية</string>
+    <string name="collector_auto_clean">اختبار كل ساعة ومسح الواقع</string>
+    <string name="collector_auto_clean_never">بيختبر كل السيرفرات من موبايلك كل ساعة ويمسح اللي بيعمل timeout</string>
+    <string name="collector_auto_clean_last">آخر مرة %1$s: %2$d شغال، اتمسح %3$d</string>
+    <string name="collector_auto_clean_offline">آخر مرة %1$s: مفيش ولا سيرفر رد (النت فاصل؟) فمتمسحش حاجة</string>
+    <string name="collector_run_now">اختبر وامسح دلوقتي</string>
+    <string name="collector_run_now_summary">بيشتغل في الخلفية والنتيجة بتظهر هنا</string>
+    <string name="collector_run_now_started">بدأ الاختبار في الخلفية</string>
+    <string name="collector_section_quick">قوايم جاهزة</string>
+    <string name="collector_section_protocols">حسب البروتوكول</string>
+    <string name="collector_section_countries">حسب الدولة</string>
+    <string name="collector_select_all_countries">تحديد الكل</string>
+    <string name="collector_fastest">الأسرع</string>
+    <string name="collector_all">كل السيرفرات</string>
+    <string name="collector_servers_count">%1$d سيرفر</string>
+    <string name="collector_added_badge">متضاف ✓ · %1$d سيرفر</string>
+    <string name="collector_add_selected">ضيف %1$d كاشتراكات</string>
+    <string name="collector_added_count">اتضاف %1$d اشتراك وجاري التحديث</string>
+    <string name="collector_remove">شيل %1$s</string>
+    <string name="collector_load_failed">معرفتش أحمّل قايمة السيرفرات</string>
+    <string name="collector_retry">حاول تاني</string>
+    <string name="collector_unknown_country">غير معروف</string>
+    <string name="collector_stats">%1$d سيرفر شغال من %2$d دولة</string>
 </resources>

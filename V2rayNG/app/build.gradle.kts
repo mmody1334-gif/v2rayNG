@@ -57,6 +57,8 @@ android {
         }
         create("playstore") {
             dimension = "distribution"
+            // Own package id so it installs next to the official v2rayNG.
+            applicationIdSuffix = ".collector"
             buildConfigField("String", "DISTRIBUTION", "\"Play Store\"")
         }
     }

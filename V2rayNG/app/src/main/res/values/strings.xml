@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">v2rayNG</string>
+    <string name="app_name" translatable="false">سيرفراتي</string>
     <string name="app_widget_name">Switch</string>
     <string name="app_tile_name">Switch</string>
     <string name="app_tile_first_use">Add a profile in the app before using this feature.</string>
@@ -565,4 +565,29 @@
     <string name="sub_info_traffic" translatable="false">%1$s / %2$s</string>
     <string name="sub_info_unlimited">Unlimited</string>
 
+
+    <!-- v2-collector -->
+    <string name="collector_title">Free servers (Collector)</string>
+    <string name="collector_auto_clean">Hourly test &amp; remove dead servers</string>
+    <string name="collector_auto_clean_never">Tests all servers from this phone every hour and deletes the ones that time out</string>
+    <string name="collector_auto_clean_last">Last run %1$s: %2$d working, %3$d removed</string>
+    <string name="collector_auto_clean_offline">Last run %1$s: no server answered (offline?), nothing removed</string>
+    <string name="collector_run_now">Test &amp; clean now</string>
+    <string name="collector_run_now_summary">Runs in the background; results appear here</string>
+    <string name="collector_run_now_started">Testing started in the background</string>
+    <string name="collector_section_quick">Ready lists</string>
+    <string name="collector_section_protocols">By protocol</string>
+    <string name="collector_section_countries">By country</string>
+    <string name="collector_select_all_countries">Select all</string>
+    <string name="collector_fastest">Fastest</string>
+    <string name="collector_all">All servers</string>
+    <string name="collector_servers_count">%1$d servers</string>
+    <string name="collector_added_badge">Added ✓ · %1$d servers</string>
+    <string name="collector_add_selected">Add %1$d as subscriptions</string>
+    <string name="collector_added_count">%1$d subscriptions added and updating</string>
+    <string name="collector_remove">Remove %1$s</string>
+    <string name="collector_load_failed">Could not load the server list</string>
+    <string name="collector_retry">Retry</string>
+    <string name="collector_unknown_country">Unknown</string>
+    <string name="collector_stats">%1$d working servers from %2$d countries</string>
 </resources>
