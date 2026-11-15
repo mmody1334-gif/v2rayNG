@@ -138,3 +138,14 @@ jobs:
         with:
           name: servrati-test-apks
           path: out/*.apk
+
+      - name: Publish test build to "shroudly-test" pre-release
+        if: github.ref == 'refs/heads/feature/shroudly'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete shroudly-test -y --cleanup-tag -R "$GITHUB_REPOSITORY" || true
+          gh release create shroudly-test out/*.apk -R "$GITHUB_REPOSITORY" --prerelease \
+            --title "سيرفراتي + Shroudly — نسخة تجريبية" \
+            --notes "Test build from feature/shroudly (${GITHUB_SHA::7}). Not the stable app-latest." \
+            --target "$GITHUB_SHA"
