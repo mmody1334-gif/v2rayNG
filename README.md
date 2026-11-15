@@ -27,6 +27,14 @@ Download the latest release here:
 
 ---
 
+### Shroudly DPI Evasion Engine / فك الحجب المباشر والتمويه المتقدم
+
+- **Standalone Mode (فك الحجب بدون سيرفر):** Bypass domain-level censorship directly without requiring external proxy servers.
+- **Server Camouflage (تمويه الاتصال بالسيرفر):** Protect VPS server handshakes using SNI desynchronization, packet splitting, and out-of-band TLS record fragmentation.
+- Details & architecture guide: [docs/SHROUDLY.md](docs/SHROUDLY.md)
+
+---
+
 ### Geoip and Geosite
 
 - geoip.dat and geosite.dat files are in `Android/data/com.v2ray.ang/files/assets` (path may differ on some Android device)
