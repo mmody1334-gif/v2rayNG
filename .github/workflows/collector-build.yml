@@ -50,7 +50,18 @@ jobs:
         if: steps.hev.outputs.cache-hit != 'true'
         run: bash compile-hevtun.sh
 
-      - name: Copy libhevtun
+      - name: Restore cached libshroudly
+        id: shroudly
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/libs
+          key: libshroudly-${{ runner.os }}-${{ hashFiles('.git/modules/third_party/Shroudly/HEAD') }}-${{ hashFiles('compile-shroudly.sh') }}
+
+      - name: Build libshroudly
+        if: steps.shroudly.outputs.cache-hit != 'true'
+        run: bash compile-shroudly.sh
+
+      - name: Copy native libs
         run: cp -r libs V2rayNG/app
 
       - name: Download libv2ray.aar (matching AndroidLibXrayLite submodule)

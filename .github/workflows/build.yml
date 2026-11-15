@@ -57,7 +57,26 @@ jobs:
         path: ${{ github.workspace }}/libs
         key: libhevtun-${{ runner.os }}-${{ env.NDK_HOME }}-${{ hashFiles('.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('compile-hevtun.sh') }}
 
-    - name: Copy libhevtun
+    - name: Restore cached libshroudly
+      id: cache-libshroudly-restore
+      uses: actions/cache/restore@v6
+      with:
+        path: ${{ github.workspace }}/libs
+        key: libshroudly-${{ runner.os }}-${{ hashFiles('.git/modules/third_party/Shroudly/HEAD') }}-${{ hashFiles('compile-shroudly.sh') }}
+
+    - name: Build libshroudly
+      if: steps.cache-libshroudly-restore.outputs.cache-hit != 'true'
+      run: |
+        bash compile-shroudly.sh
+
+    - name: Save libshroudly
+      if: steps.cache-libshroudly-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: ${{ github.workspace }}/libs
+        key: libshroudly-${{ runner.os }}-${{ hashFiles('.git/modules/third_party/Shroudly/HEAD') }}-${{ hashFiles('compile-shroudly.sh') }}
+
+    - name: Copy native libs
       run: |
         cp -r ${{ github.workspace }}/libs ${{ github.workspace }}/V2rayNG/app
 
