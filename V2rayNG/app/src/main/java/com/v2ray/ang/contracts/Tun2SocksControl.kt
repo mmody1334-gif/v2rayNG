@@ -1,9 +1,12 @@
 package com.v2ray.ang.contracts
 
+sealed class Tun2SocksTarget {
+    data object Xray : Tun2SocksTarget()
+    data class Shroudly(val port: Int, val user: String, val pass: String) : Tun2SocksTarget()
+}
+
 /**
  * Interface that defines the control operations for tun2socks implementations.
- * 
- * This interface is implemented by different tunnel solutions like:
  */
 interface Tun2SocksControl {
     /**

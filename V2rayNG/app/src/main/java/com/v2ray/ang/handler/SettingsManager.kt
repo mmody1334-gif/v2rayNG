@@ -485,6 +485,8 @@ object SettingsManager {
         ensureDefaultValue(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_METHOD, AppConfig.OBSERVATORY_LEAST_LOAD_METHOD)
         ensureDefaultValue(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_SAMPLING, AppConfig.OBSERVATORY_LEAST_LOAD_SAMPLING)
         ensureDefaultValue(AppConfig.PREF_OBSERVATORY_LEAST_LOAD_TIMEOUT, AppConfig.OBSERVATORY_LEAST_LOAD_TIMEOUT)
+        ensureDefaultValue(AppConfig.PREF_SHROUDLY_MODE, AppConfig.SHROUDLY_MODE_OFF)
+        ensureDefaultValue(AppConfig.PREF_SHROUDLY_STRATEGY, AppConfig.SHROUDLY_STRATEGY_AUTO)
     }
 
     private fun ensureDefaultValue(key: String, default: String) {
@@ -588,4 +590,27 @@ object SettingsManager {
         }
     }
 
+    fun getShroudlyMode(): String {
+        return MmkvManager.decodeSettingsString(AppConfig.PREF_SHROUDLY_MODE) ?: AppConfig.SHROUDLY_MODE_OFF
+    }
+
+    fun setShroudlyMode(mode: String) {
+        MmkvManager.encodeSettings(AppConfig.PREF_SHROUDLY_MODE, mode)
+    }
+
+    fun getShroudlyStrategy(): String {
+        return MmkvManager.decodeSettingsString(AppConfig.PREF_SHROUDLY_STRATEGY) ?: AppConfig.SHROUDLY_STRATEGY_AUTO
+    }
+
+    fun setShroudlyStrategy(strategy: String) {
+        MmkvManager.encodeSettings(AppConfig.PREF_SHROUDLY_STRATEGY, strategy)
+    }
+
+    fun getShroudlyQuicOff(): Boolean {
+        return MmkvManager.decodeSettingsBool(AppConfig.PREF_SHROUDLY_QUIC_OFF, true)
+    }
+
+    fun setShroudlyQuicOff(off: Boolean) {
+        MmkvManager.encodeSettings(AppConfig.PREF_SHROUDLY_QUIC_OFF, off)
+    }
 }

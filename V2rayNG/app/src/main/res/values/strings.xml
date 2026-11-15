@@ -623,4 +623,24 @@
     <string name="collector_clean">Clean IPs (not listed as VPN)</string>
     <string name="collector_gulf4">Same time zone as Oman (UAE/Oman)</string>
     <string name="check_open_time_settings">Open time settings (set to %1$s)</string>
+    <string name="title_shroudly_settings">Shroudly (DPI Bypass)</string>
+    <string name="shroudly_chip_title">🛡️ Bypass without server</string>
+    <string name="shroudly_direct_connected">Shroudly — Direct Connection</string>
+    <string name="shroudly_mode_title">Shroudly Mode</string>
+    <string name="shroudly_mode_off">Off</string>
+    <string name="shroudly_mode_standalone">Standalone (Serverless)</string>
+    <string name="shroudly_mode_chain">Server Camouflage (Chain)</string>
+    <string name="shroudly_strategy_title">Evasion Strategy</string>
+    <string name="shroudly_quic_title">Disable QUIC</string>
+    <string name="shroudly_quic_summary">Force TCP so DPI evasion can be applied</string>
+    <string name="shroudly_license_title">MIT License &amp; Source</string>
+    <string name="shroudly_credits">Powered by Shroudly engine (MIT License)</string>
+    <string name="shroudly_disclaimer">Note: Shroudly does not change your IP or country, and does not bypass IP-level blocks. It evades DPI (SNI inspection) directly.</string>
+    <string name="shroudly_stats_bypass">Bypassed: %1$d</string>
+    <string name="shroudly_stats_blocked">Blocked: %1$d</string>
+    <string name="shroudly_stats_title">Engine Statistics</string>
+    <string name="shroudly_last_error">Last error: %1$s</string>
+    <string name="shroudly_engine_running">Engine Running</string>
+    <string name="shroudly_engine_stopped">Engine Stopped</string>
+    <string name="shroudly_not_supported">Shroudly is not supported on this device ABI</string>
 </resources>

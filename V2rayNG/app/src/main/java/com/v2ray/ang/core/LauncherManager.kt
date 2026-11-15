@@ -22,7 +22,8 @@ import com.v2ray.ang.util.Utils
 object LauncherManager {
 
     fun startServiceFromToggle(context: Context): Boolean {
-        if (MmkvManager.getSelectServer().isNullOrEmpty()) {
+        val isStandalone = SettingsManager.getShroudlyMode() == AppConfig.SHROUDLY_MODE_STANDALONE
+        if (!isStandalone && MmkvManager.getSelectServer().isNullOrEmpty()) {
             context.toast(R.string.app_tile_first_use)
             return false
         }
@@ -73,31 +74,34 @@ object LauncherManager {
         // Note: isRunning check is removed here to avoid loading Native libraries in the UI process.
         // The check is performed in CoreServiceManager when the service starts in the daemon process.
 
-        val guid = MmkvManager.getSelectServer()
-            ?: run {
-                LogUtil.e(AppConfig.TAG, "LauncherManager: No server selected")
-                error(context.getString(R.string.app_tile_first_use))
-            }
+        val isStandalone = SettingsManager.getShroudlyMode() == AppConfig.SHROUDLY_MODE_STANDALONE
+        if (!isStandalone) {
+            val guid = MmkvManager.getSelectServer()
+                ?: run {
+                    LogUtil.e(AppConfig.TAG, "LauncherManager: No server selected")
+                    error(context.getString(R.string.app_tile_first_use))
+                }
 
-        val config = MmkvManager.decodeServerConfig(guid)
-            ?: run {
-                LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to decode server config")
+            val config = MmkvManager.decodeServerConfig(guid)
+                ?: run {
+                    LogUtil.e(AppConfig.TAG, "LauncherManager: Failed to decode server config")
+                    error(context.getString(R.string.toast_config_file_invalid))
+                }
+
+            if (!config.configType.isComplexType()
+                && !Utils.isValidUrl(config.server)
+                && !Utils.isPureIpAddress(config.server.orEmpty())
+            ) {
+                LogUtil.e(AppConfig.TAG, "LauncherManager: Invalid server configuration")
                 error(context.getString(R.string.toast_config_file_invalid))
             }
 
-        if (!config.configType.isComplexType()
-            && !Utils.isValidUrl(config.server)
-            && !Utils.isPureIpAddress(config.server.orEmpty())
-        ) {
-            LogUtil.e(AppConfig.TAG, "LauncherManager: Invalid server configuration")
-            error(context.getString(R.string.toast_config_file_invalid))
-        }
+            SettingsManager.refreshRuntimeSocksPort()
 
-        SettingsManager.refreshRuntimeSocksPort()
-
-        if (config.insecure == true && config.pinnedCA256.isNullOrEmpty()) {
-            context.toastError(R.string.toast_allow_insecure_deprecated)
-            Utils.setClipboard(context, context.getString(R.string.toast_allow_insecure_deprecated))
+            if (config.insecure == true && config.pinnedCA256.isNullOrEmpty()) {
+                context.toastError(R.string.toast_allow_insecure_deprecated)
+                Utils.setClipboard(context, context.getString(R.string.toast_allow_insecure_deprecated))
+            }
         }
 
         if (MmkvManager.decodeSettingsBool(AppConfig.PREF_PROXY_SHARING)) {
@@ -106,18 +110,18 @@ object LauncherManager {
             context.toast(R.string.toast_services_start)
         }
 
-        val isRootMode = SettingsManager.isRootMode()
+        val isRootMode = !isStandalone && SettingsManager.isRootMode()
         if (isRootMode && !RootManager.isRootAvailable()) {
             LogUtil.e(AppConfig.TAG, "LauncherManager: root mode requires root but none available")
             error(context.getString(R.string.toast_root_required))
         }
 
-        val intent = if (isRootMode) {
-            LogUtil.i(AppConfig.TAG, "LauncherManager: Starting Root service")
-            Intent(context.applicationContext, CoreRootService::class.java)
-        } else if (SettingsManager.isVpnMode()) {
+        val intent = if (isStandalone || SettingsManager.isVpnMode()) {
             LogUtil.i(AppConfig.TAG, "LauncherManager: Starting VPN service")
             Intent(context.applicationContext, CoreVpnService::class.java)
+        } else if (isRootMode) {
+            LogUtil.i(AppConfig.TAG, "LauncherManager: Starting Root service")
+            Intent(context.applicationContext, CoreRootService::class.java)
         } else {
             LogUtil.i(AppConfig.TAG, "LauncherManager: Starting Proxy service")
             Intent(context.applicationContext, CoreProxyOnlyService::class.java)

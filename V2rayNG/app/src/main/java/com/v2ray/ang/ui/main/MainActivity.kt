@@ -31,6 +31,7 @@ import com.v2ray.ang.ui.base.HelperBaseComponentActivity
 import com.v2ray.ang.ui.checkupdate.CheckUpdateActivity
 import com.v2ray.ang.ui.collector.CollectorActivity
 import com.v2ray.ang.ui.connectioncheck.ConnectionCheckActivity
+import com.v2ray.ang.ui.shroudly.ShroudlyActivity
 import com.v2ray.ang.ui.logcat.LogcatActivity
 import com.v2ray.ang.ui.perappproxy.PerAppProxyActivity
 import com.v2ray.ang.ui.routing.RoutingSettingActivity
@@ -108,6 +109,13 @@ class MainActivity : HelperBaseComponentActivity() {
             onAction = { action ->
                 when (action) {
                     MainAction.ToggleService -> handleFabAction()
+                    MainAction.ToggleShroudlyStandalone -> {
+                        val wasRunning = mainViewModel.uiState.value.isRunning
+                        mainViewModel.onAction(action)
+                        if (wasRunning) {
+                            LauncherManager.restartServiceOrStart(this, ::requestServiceStart)
+                        }
+                    }
                     MainAction.TestCurrentServer -> handleLayoutTestClick()
                     MainAction.ImportQRcode -> importQRcode()
                     MainAction.ImportClipboard -> importClipboard()
@@ -150,6 +158,7 @@ class MainActivity : HelperBaseComponentActivity() {
         val intent = when (destination) {
             MainDestination.Collector -> Intent(this, CollectorActivity::class.java)
             MainDestination.ConnectionCheck -> Intent(this, ConnectionCheckActivity::class.java)
+            MainDestination.Shroudly -> Intent(this, ShroudlyActivity::class.java)
             MainDestination.Subscriptions -> Intent(this, SubSettingActivity::class.java)
             MainDestination.PerAppProxy -> Intent(this, PerAppProxyActivity::class.java)
             MainDestination.Routing -> Intent(this, RoutingSettingActivity::class.java)
@@ -179,12 +188,13 @@ class MainActivity : HelperBaseComponentActivity() {
     }
 
     private fun requestServiceStart() {
-        if (!SettingsManager.isVpnMode()) {
-            startV2Ray()
+        val isStandalone = SettingsManager.getShroudlyMode() == AppConfig.SHROUDLY_MODE_STANDALONE
+        if (isStandalone || SettingsManager.isVpnMode()) {
+            val intent = VpnService.prepare(this)
+            if (intent == null) startV2Ray() else requestVpnPermission.launch(intent)
             return
         }
-        val intent = VpnService.prepare(this)
-        if (intent == null) startV2Ray() else requestVpnPermission.launch(intent)
+        startV2Ray()
     }
 
     private fun handleLayoutTestClick() {
@@ -194,7 +204,8 @@ class MainActivity : HelperBaseComponentActivity() {
     }
 
     private fun startV2Ray() {
-        if (mainViewModel.uiState.value.selectedGuid.isNullOrEmpty()) {
+        val isStandalone = SettingsManager.getShroudlyMode() == AppConfig.SHROUDLY_MODE_STANDALONE
+        if (!isStandalone && mainViewModel.uiState.value.selectedGuid.isNullOrEmpty()) {
             toast(R.string.title_file_chooser)
             return
         }

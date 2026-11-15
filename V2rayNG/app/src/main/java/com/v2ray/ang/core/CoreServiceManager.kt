@@ -75,13 +75,18 @@ object CoreServiceManager {
      * Checks if the V2Ray service is running.
      * @return True if the service is running, false otherwise.
      */
-    fun isRunning() = coreController.isRunning
+    fun isRunning() = coreController.isRunning || com.v2ray.ang.shroudly.ShroudlyEngine.isRunning
 
     /**
      * Gets the name of the currently running server.
      * @return The name of the running server.
      */
-    fun getRunningServerName() = currentConfig?.remarks.orEmpty()
+    fun getRunningServerName(): String {
+        if (com.v2ray.ang.shroudly.ShroudlyEngine.isRunning) {
+            return "Shroudly — اتصال مباشر"
+        }
+        return currentConfig?.remarks.orEmpty()
+    }
 
     /**
      * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):

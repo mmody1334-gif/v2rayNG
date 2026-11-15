@@ -16,14 +16,19 @@ import com.v2ray.ang.AppConfig.LOOPBACK
 import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.contracts.ServiceControl
 import com.v2ray.ang.contracts.Tun2SocksControl
+import com.v2ray.ang.contracts.Tun2SocksTarget
 import com.v2ray.ang.core.CoreServiceManager
 import com.v2ray.ang.handler.AppLocaleManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.NotificationManager
 import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.helper.MessageHelper
 import com.v2ray.ang.root.RootLanSharing
+import com.v2ray.ang.shroudly.SocksAuth
+import com.v2ray.ang.shroudly.ShroudlyEngine
 import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
+import java.io.File
 import java.lang.ref.SoftReference
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -106,6 +111,51 @@ class CoreVpnService : VpnService(), ServiceControl {
             LogUtil.e(AppConfig.TAG, "StartCore-VPN: Interface not initialized")
             return
         }
+
+        val shroudlyMode = SettingsManager.getShroudlyMode()
+        if (shroudlyMode == AppConfig.SHROUDLY_MODE_STANDALONE) {
+            LogUtil.i(AppConfig.TAG, "StartCore-VPN: Starting in Shroudly standalone mode")
+            val auth = SocksAuth.random()
+            val authFile = File(filesDir, "shroudly-auth")
+            try {
+                auth.writeTo(authFile)
+            } catch (e: Exception) {
+                LogUtil.e(AppConfig.TAG, "Failed to write Shroudly auth file", e)
+                MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_FAILURE, "Failed to create Shroudly auth")
+                stopAllService()
+                return
+            }
+
+            val port = ShroudlyEngine.freePort()
+            val blockIps = ShroudlyEngine.readBlockIps(this)
+            val strategy = SettingsManager.getShroudlyStrategy()
+            val quicOff = SettingsManager.getShroudlyQuicOff()
+
+            val started = ShroudlyEngine.start(
+                port = port,
+                authFile = authFile,
+                blockIps = blockIps,
+                strategy = strategy,
+                auto = strategy.equals(AppConfig.SHROUDLY_STRATEGY_AUTO, ignoreCase = true),
+                quicOff = quicOff
+            )
+
+            if (!started) {
+                val err = ShroudlyEngine.lastError ?: "Failed to start Shroudly engine"
+                LogUtil.e(AppConfig.TAG, "StartCore-VPN: $err")
+                MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_FAILURE, err)
+                stopAllService()
+                return
+            }
+
+            ShroudlyEngine.setAuth(auth)
+            runTun2socks(Tun2SocksTarget.Shroudly(port, auth.user, auth.pass))
+
+            NotificationManager.showNotification(null)
+            MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_SUCCESS, "")
+            return
+        }
+
         if (!CoreServiceManager.startCoreLoop(mInterface)) {
             LogUtil.e(AppConfig.TAG, "StartCore-VPN: Failed to start core loop")
             stopAllService()
@@ -149,7 +199,10 @@ class CoreVpnService : VpnService(), ServiceControl {
             return false
         }
 
-        runTun2socks()
+        val shroudlyMode = SettingsManager.getShroudlyMode()
+        if (shroudlyMode != AppConfig.SHROUDLY_MODE_STANDALONE) {
+            runTun2socks()
+        }
         return true
     }
 
@@ -226,12 +279,13 @@ class CoreVpnService : VpnService(), ServiceControl {
         }
 
         // Configure DNS servers
-        //if (MmkvManager.decodeSettingsBool(AppConfig.PREF_LOCAL_DNS_ENABLED) == true) {
-        //  builder.addDnsServer(PRIVATE_VLAN4_ROUTER)
-        //} else {
-        SettingsManager.getVpnDnsServers().forEach {
-            if (Utils.isPureIpAddress(it)) {
-                builder.addDnsServer(it)
+        if (SettingsManager.getShroudlyMode() == AppConfig.SHROUDLY_MODE_STANDALONE) {
+            builder.addDnsServer(vpnConfig.ipv4Router)
+        } else {
+            SettingsManager.getVpnDnsServers().forEach {
+                if (Utils.isPureIpAddress(it)) {
+                    builder.addDnsServer(it)
+                }
             }
         }
 
@@ -302,28 +356,29 @@ class CoreVpnService : VpnService(), ServiceControl {
      * Runs the tun2socks process.
      * Starts the tun2socks process with the appropriate parameters.
      */
-    private fun runTun2socks() {
+    private fun runTun2socks(target: Tun2SocksTarget = Tun2SocksTarget.Xray) {
         if (SettingsManager.isUsingHevTun()) {
-            tun2SocksService = TProxyService(
+            val tProxy = TProxyService(
                 context = applicationContext,
                 vpnInterface = mInterface,
                 isRunningProvider = { isRunning },
-                restartCallback = { runTun2socks() }
+                restartCallback = { runTun2socks(target) }
             )
+            tun2SocksService = tProxy
+            tProxy.startTun2Socks(target)
         } else {
             tun2SocksService = null
+            tun2SocksService?.startTun2Socks()
         }
-
-        tun2SocksService?.startTun2Socks()
     }
 
     private fun stopAllService(isForced: Boolean = true) {
-//        val configName = defaultDPreference.getPrefString(PREF_CURR_CONFIG_GUID, "")
-//        val emptyInfo = VpnNetworkInfo()
-//        val info = loadVpnNetworkInfo(configName, emptyInfo)!! + (lastNetworkInfo ?: emptyInfo)
-//        saveVpnNetworkInfo(configName, info)
         unlockStart()
         isRunning = false
+
+        if (ShroudlyEngine.isBusy || ShroudlyEngine.isRunning) {
+            ShroudlyEngine.stop()
+        }
 
         tun2SocksService?.stopTun2Socks()
         tun2SocksService = null

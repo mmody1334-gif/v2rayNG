@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.ParcelFileDescriptor
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.contracts.Tun2SocksControl
+import com.v2ray.ang.contracts.Tun2SocksTarget
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.util.LogUtil
@@ -43,61 +44,98 @@ class TProxyService(
     /**
      * Starts the tun2socks process with the appropriate parameters.
      */
-    override fun startTun2Socks() {
-//        LogUtil.i(AppConfig.TAG, "Starting HevSocks5Tunnel via JNI")
-
-        val configContent = buildConfig()
+    fun startTun2Socks(target: Tun2SocksTarget) {
+        val configContent = buildConfig(target)
         val configFile = File(context.filesDir, "hev-socks5-tunnel.yaml").apply {
             writeText(configContent)
         }
-//        LogUtil.i(AppConfig.TAG, "Config file created: ${configFile.absolutePath}")
         LogUtil.d(AppConfig.TAG, "HevSocks5Tunnel Config content:\n$configContent")
 
         try {
-//            LogUtil.i(AppConfig.TAG, "TProxyStartService...")
             TProxyStartService(configFile.absolutePath, vpnInterface.fd)
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "HevSocks5Tunnel exception: ${e.message}")
         }
     }
 
-    private fun buildConfig(): String {
-        val socksPort = SettingsManager.getSocksPort()
-        val socksUsername = SettingsManager.getSocksUsername()
-        val socksPassword = SettingsManager.getSocksPassword()
+    override fun startTun2Socks() {
+        startTun2Socks(Tun2SocksTarget.Xray)
+    }
+
+    fun buildConfig(target: Tun2SocksTarget = Tun2SocksTarget.Xray): String {
         val vpnConfig = SettingsManager.getCurrentVpnInterfaceAddressConfig()
-        val escapedSocksUsername = socksUsername?.replace("'", "''")
-        val escapedSocksPassword = socksPassword?.replace("'", "''")
-        return buildString {
-            appendLine("tunnel:")
-            appendLine("  mtu: ${SettingsManager.getVpnMtu()}")
-            appendLine("  ipv4: ${vpnConfig.ipv4Client}")
+        val timeoutSetting = MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT) ?: AppConfig.HEVTUN_RW_TIMEOUT
+        val parts = timeoutSetting.split(",")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+        val tcpTimeout = parts.getOrNull(0)?.toIntOrNull() ?: 300
+        val udpTimeout = parts.getOrNull(1)?.toIntOrNull() ?: 60
+        val logLevel = MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_LOGLEVEL, AppConfig.DEFAULT_HEV_TUNNEL_LOGLEVEL)
 
-            if (SettingsManager.vpnCapturesIpv6()) {
-                appendLine("  ipv6: '${vpnConfig.ipv6Client}'")
+        return when (target) {
+            is Tun2SocksTarget.Xray -> {
+                val socksPort = SettingsManager.getSocksPort()
+                val socksUsername = SettingsManager.getSocksUsername()
+                val socksPassword = SettingsManager.getSocksPassword()
+                val escapedSocksUsername = socksUsername?.replace("'", "''")
+                val escapedSocksPassword = socksPassword?.replace("'", "''")
+                buildString {
+                    appendLine("tunnel:")
+                    appendLine("  mtu: ${SettingsManager.getVpnMtu()}")
+                    appendLine("  ipv4: ${vpnConfig.ipv4Client}")
+
+                    if (SettingsManager.vpnCapturesIpv6()) {
+                        appendLine("  ipv6: '${vpnConfig.ipv6Client}'")
+                    }
+
+                    appendLine("socks5:")
+                    appendLine("  port: ${socksPort}")
+                    appendLine("  address: ${AppConfig.LOOPBACK}")
+                    appendLine("  udp: 'udp'")
+                    if (escapedSocksUsername != null && escapedSocksPassword != null) {
+                        appendLine("  username: '${escapedSocksUsername}'")
+                        appendLine("  password: '${escapedSocksPassword}'")
+                    }
+
+                    appendLine("misc:")
+                    appendLine("  tcp-read-write-timeout: ${tcpTimeout * 1000}")
+                    appendLine("  udp-read-write-timeout: ${udpTimeout * 1000}")
+                    appendLine("  log-level: ${logLevel}")
+                }
             }
+            is Tun2SocksTarget.Shroudly -> {
+                val escapedUser = target.user.replace("'", "''")
+                val escapedPass = target.pass.replace("'", "''")
+                buildString {
+                    appendLine("tunnel:")
+                    appendLine("  mtu: ${SettingsManager.getVpnMtu()}")
+                    appendLine("  ipv4: ${vpnConfig.ipv4Client}")
 
-            appendLine("socks5:")
-            appendLine("  port: ${socksPort}")
-            appendLine("  address: ${AppConfig.LOOPBACK}")
-            appendLine("  udp: 'udp'")
-            if (escapedSocksUsername != null && escapedSocksPassword != null) {
-                appendLine("  username: '${escapedSocksUsername}'")
-                appendLine("  password: '${escapedSocksPassword}'")
+                    if (SettingsManager.vpnCapturesIpv6()) {
+                        appendLine("  ipv6: '${vpnConfig.ipv6Client}'")
+                    }
+
+                    appendLine("socks5:")
+                    appendLine("  port: ${target.port}")
+                    appendLine("  address: ${AppConfig.LOOPBACK}")
+                    appendLine("  udp: 'udp'")
+                    appendLine("  username: '${escapedUser}'")
+                    appendLine("  password: '${escapedPass}'")
+
+                    appendLine("mapdns:")
+                    appendLine("  address: ${vpnConfig.ipv4Router}")
+                    appendLine("  port: 53")
+                    appendLine("  network: 198.19.0.0")
+                    appendLine("  netmask: 255.255.192.0")
+                    appendLine("  cache-size: 10000")
+
+                    appendLine("misc:")
+                    appendLine("  connect-timeout: 10000")
+                    appendLine("  tcp-read-write-timeout: ${tcpTimeout * 1000}")
+                    appendLine("  udp-read-write-timeout: ${udpTimeout * 1000}")
+                    appendLine("  log-level: ${logLevel}")
+                }
             }
-
-            // Read-write timeout settings
-            val timeoutSetting = MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_RW_TIMEOUT) ?: AppConfig.HEVTUN_RW_TIMEOUT
-            val parts = timeoutSetting.split(",")
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-            val tcpTimeout = parts.getOrNull(0)?.toIntOrNull() ?: 300
-            val udpTimeout = parts.getOrNull(1)?.toIntOrNull() ?: 60
-
-            appendLine("misc:")
-            appendLine("  tcp-read-write-timeout: ${tcpTimeout * 1000}")
-            appendLine("  udp-read-write-timeout: ${udpTimeout * 1000}")
-            appendLine("  log-level: ${MmkvManager.decodeSettingsString(AppConfig.PREF_HEV_TUNNEL_LOGLEVEL, AppConfig.DEFAULT_HEV_TUNNEL_LOGLEVEL)}")
         }
     }
 

@@ -630,4 +630,24 @@
     <string name="collector_clean">IP نظيف (مش متسجل VPN)</string>
     <string name="collector_gulf4">نفس توقيت عُمان (الإمارات/عُمان)</string>
     <string name="check_open_time_settings">افتح إعدادات التوقيت (خليه %1$s)</string>
+    <string name="title_shroudly_settings">إعدادات Shroudly (فك الحجب)</string>
+    <string name="shroudly_chip_title">🛡️ فك الحجب بدون سيرفر</string>
+    <string name="shroudly_direct_connected">Shroudly — اتصال مباشر</string>
+    <string name="shroudly_mode_title">وضع Shroudly</string>
+    <string name="shroudly_mode_off">إيقاف</string>
+    <string name="shroudly_mode_standalone">مستقل (فك الحجب بدون سيرفر)</string>
+    <string name="shroudly_mode_chain">تمويه الاتصال بالسيرفر (Chain)</string>
+    <string name="shroudly_strategy_title">استراتيجية التمويه</string>
+    <string name="shroudly_quic_title">تعطيل QUIC</string>
+    <string name="shroudly_quic_summary">إجبار التطبيقات على استخدام TCP لتطبيق تقنيات التمويه</string>
+    <string name="shroudly_license_title">رخصة MIT ومصدر الكود</string>
+    <string name="shroudly_credits">مبني على محرك Shroudly المفتوح المصدر (رخصة MIT)</string>
+    <string name="shroudly_disclaimer">تنبيه: Shroudly ما بيغيّرش الـ IP ولا الدولة، ومش بيفك الحجب اللي على مستوى الـ IP. ده مكمّل للسيرفرات لفك حجب المواقع مباشرة.</string>
+    <string name="shroudly_stats_bypass">تخطي (Bypass): %1$d</string>
+    <string name="shroudly_stats_blocked">محجوب (Blocked): %1$d</string>
+    <string name="shroudly_stats_title">إحصائيات المحرك</string>
+    <string name="shroudly_last_error">آخر خطأ: %1$s</string>
+    <string name="shroudly_engine_running">المحرك يعمل</string>
+    <string name="shroudly_engine_stopped">المحرك متوقف</string>
+    <string name="shroudly_not_supported">محرك Shroudly غير مدعوم على هذا الجهاز</string>
 </resources>
