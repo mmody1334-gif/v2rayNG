@@ -113,9 +113,7 @@ jobs:
           fi
           exit $code
 
-      - name: Publish to "app-latest" release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare APK outputs
         run: |
           mkdir -p out
           for f in V2rayNG/app/build/outputs/apk/playstore/release/*.apk; do
@@ -123,8 +121,20 @@ jobs:
             cp "$f" "out/Servrati_${abi}.apk"
           done
           ls -la out
+
+      - name: Publish to "app-latest" release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           gh release delete app-latest -y --cleanup-tag -R "$GITHUB_REPOSITORY" || true
           gh release create app-latest out/*.apk -R "$GITHUB_REPOSITORY" \
             --title "سيرفراتي — آخر نسخة" \
             --notes "Built from ${GITHUB_SHA::7} on $(date -u '+%Y-%m-%d %H:%M UTC'). Most phones: Servrati_arm64-v8a.apk (or Servrati_universal.apk if unsure)." \
             --target "$GITHUB_SHA"
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref != 'refs/heads/master'
+        with:
+          name: servrati-test-apks
+          path: out/*.apk
