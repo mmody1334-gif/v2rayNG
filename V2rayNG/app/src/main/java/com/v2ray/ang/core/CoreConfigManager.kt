@@ -505,7 +505,11 @@ object CoreConfigManager {
         v2rayConfig.policy = null
         v2rayConfig.outbounds.forEach { key -> key.mux = null }
         v2rayConfig.outbounds.removeAll { it.tag == AppConfig.TAG_SHROUDLY_OUT }
-        v2rayConfig.outbounds.forEach { it.streamSettings?.sockopt?.dialerProxy = null }
+        // Only undo the Shroudly chain: a profile's own dialerProxy (proxy chaining) must stay.
+        v2rayConfig.outbounds.forEach { out ->
+            val sockopt = out.streamSettings?.sockopt
+            if (sockopt?.dialerProxy == AppConfig.TAG_SHROUDLY_OUT) sockopt.dialerProxy = null
+        }
     }
 
     private fun applyShroudlyChainMode(v2rayConfig: V2rayConfig) {
@@ -538,8 +542,6 @@ object CoreConfigManager {
             mux = null
         )
 
-        v2rayConfig.outbounds.add(shroudlyOutbound)
-
         for (outbound in v2rayConfig.getAllProxyOutbound()) {
             val proto = outbound.protocol.lowercase()
             if (proto == "wireguard" || proto.startsWith("hysteria")) {
@@ -551,8 +553,15 @@ object CoreConfigManager {
                 continue
             }
 
-            outbound.ensureSockopt().dialerProxy = AppConfig.TAG_SHROUDLY_OUT
+            val sockopt = outbound.ensureSockopt()
+            // An outbound already dialing through another one (proxy chaining) keeps it; the
+            // first hop of the chain is the one that reaches the network and gets Shroudly.
+            if (sockopt.dialerProxy.isNullOrEmpty()) sockopt.dialerProxy = AppConfig.TAG_SHROUDLY_OUT
         }
+
+        // Added after the loop: it is a socks outbound itself, and getAllProxyOutbound() would
+        // otherwise point it at itself (dialerProxy loop).
+        v2rayConfig.outbounds.add(shroudlyOutbound)
     }
 
     /**

@@ -95,6 +95,7 @@ object AppConfig {
     const val PREF_SHROUDLY_MODE = "pref_shroudly_mode"
     const val PREF_SHROUDLY_STRATEGY = "pref_shroudly_strategy"
     const val PREF_SHROUDLY_QUIC_OFF = "pref_shroudly_quic_off"
+    const val PREF_SHROUDLY_LEARNED = "pref_shroudly_learned"
 
     const val SHROUDLY_MODE_OFF = "off"
     const val SHROUDLY_MODE_STANDALONE = "standalone"

@@ -75,7 +75,14 @@ object CoreServiceManager {
      * Checks if the V2Ray service is running.
      * @return True if the service is running, false otherwise.
      */
-    fun isRunning() = coreController.isRunning || com.v2ray.ang.shroudly.ShroudlyEngine.isRunning
+    fun isRunning() = coreController.isRunning
+
+    /**
+     * True when the xray core or the Shroudly standalone engine is running in this (daemon) process.
+     * Only the xray core counts for [isRunning]: the Shroudly engine runs beside it in chain mode,
+     * and counting it there made startCoreLoop refuse to start xray ("Core already running").
+     */
+    private fun isAnyRunning() = coreController.isRunning || com.v2ray.ang.shroudly.ShroudlyEngine.isRunning
 
     /**
      * Gets the name of the currently running server.
@@ -119,11 +126,7 @@ object CoreServiceManager {
 
     @Throws(Exception::class)
     private fun doStartCoreLoop(service: Service, vpnInterface: ParcelFileDescriptor?) {
-        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_SERVICE)
-        mFilter.addAction(Intent.ACTION_SCREEN_ON)
-        mFilter.addAction(Intent.ACTION_SCREEN_OFF)
-        mFilter.addAction(Intent.ACTION_USER_PRESENT)
-        ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
+        registerMsgReceiver(service)
 
         currentVpnInterface = vpnInterface
         launchCore(service, vpnInterface)
@@ -189,6 +192,32 @@ object CoreServiceManager {
         LogUtil.i(AppConfig.TAG, "StartCore-Manager: Core started successfully")
     }
 
+    private fun registerMsgReceiver(service: Service) {
+        val mFilter = IntentFilter(AppConfig.BROADCAST_ACTION_SERVICE)
+        mFilter.addAction(Intent.ACTION_SCREEN_ON)
+        mFilter.addAction(Intent.ACTION_SCREEN_OFF)
+        mFilter.addAction(Intent.ACTION_USER_PRESENT)
+        ContextCompat.registerReceiver(service, mMsgReceive, mFilter, Utils.receiverFlags())
+    }
+
+    /**
+     * Shroudly standalone mode runs no xray core, so startCoreLoop is never called. Register the
+     * service-control receiver anyway: without it the UI's stop and status requests (and the
+     * notification's stop button) were never received, and the VPN could not be disconnected.
+     * Undone by [stopCoreLoop], which unregisters the receiver.
+     */
+    fun startShroudlyStandaloneControl(): Boolean {
+        val service = getService() ?: return false
+        return try {
+            registerMsgReceiver(service)
+            MessageHelper.sendMsg2UI(service, AppConfig.MSG_STATE_START_SUCCESS, "")
+            true
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "StartCore-Manager: Shroudly standalone: failed to register control receiver", e)
+            false
+        }
+    }
+
     /**
      * Stops the V2Ray core service.
      * Unregisters broadcast receivers, stops notifications, and shuts down plugins.
@@ -202,7 +231,7 @@ object CoreServiceManager {
         networkMonitor = null
         currentVpnInterface = null
 
-        if (isRunning()) {
+        if (coreController.isRunning) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     coreController.stopLoop()
@@ -466,7 +495,7 @@ object CoreServiceManager {
             val serviceControl = serviceControl?.get() ?: return
             when (intent?.getIntExtra("key", 0)) {
                 AppConfig.MSG_REGISTER_CLIENT -> {
-                    if (isRunning()) {
+                    if (isAnyRunning()) {
                         MessageHelper.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_RUNNING, "")
                     } else {
                         MessageHelper.sendMsg2UI(serviceControl.getService(), AppConfig.MSG_STATE_NOT_RUNNING, "")

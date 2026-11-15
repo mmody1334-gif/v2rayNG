@@ -116,12 +116,17 @@ object LauncherManager {
             error(context.getString(R.string.toast_root_required))
         }
 
-        val intent = if (isStandalone || SettingsManager.isVpnMode()) {
-            LogUtil.i(AppConfig.TAG, "LauncherManager: Starting VPN service")
+        // Shroudly standalone runs only behind the VPN service; every other start keeps the
+        // original precedence (root, then VPN, then proxy-only).
+        val intent = if (isStandalone) {
+            LogUtil.i(AppConfig.TAG, "LauncherManager: Starting VPN service (Shroudly standalone)")
             Intent(context.applicationContext, CoreVpnService::class.java)
         } else if (isRootMode) {
             LogUtil.i(AppConfig.TAG, "LauncherManager: Starting Root service")
             Intent(context.applicationContext, CoreRootService::class.java)
+        } else if (SettingsManager.isVpnMode()) {
+            LogUtil.i(AppConfig.TAG, "LauncherManager: Starting VPN service")
+            Intent(context.applicationContext, CoreVpnService::class.java)
         } else {
             LogUtil.i(AppConfig.TAG, "LauncherManager: Starting Proxy service")
             Intent(context.applicationContext, CoreProxyOnlyService::class.java)

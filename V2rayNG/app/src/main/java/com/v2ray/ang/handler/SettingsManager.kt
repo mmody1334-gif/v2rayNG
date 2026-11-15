@@ -613,4 +613,13 @@ object SettingsManager {
     fun setShroudlyQuicOff(off: Boolean) {
         MmkvManager.encodeSettings(AppConfig.PREF_SHROUDLY_QUIC_OFF, off)
     }
+
+    /** Techniques the Shroudly engine found per site (ShroudlyLearned text), kept across runs. */
+    fun getShroudlyLearned(): String? {
+        return MmkvManager.decodeSettingsString(AppConfig.PREF_SHROUDLY_LEARNED)
+    }
+
+    fun setShroudlyLearned(text: String) {
+        MmkvManager.encodeSettings(AppConfig.PREF_SHROUDLY_LEARNED, text)
+    }
 }

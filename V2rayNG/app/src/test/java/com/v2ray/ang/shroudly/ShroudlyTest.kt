@@ -132,4 +132,26 @@ class ShroudlyTest {
         assertTrue(proxyJson.contains("dialerProxy"))
         assertTrue(proxyJson.contains("shroudly-out"))
     }
+
+    @Test
+    fun testLearnedRoundTripAndCommands() {
+        val now = 1_700_000_000_000L
+        val store = ShroudlyLearned(null)
+        store.remember("discord.com", "tlsrec(sni+1)", now - 10_000)
+        store.remember("bad host!", "split(sni)", now)        // rejected: not a host name
+        store.remember("roblox.com", "split(sni)", now)
+
+        val restored = ShroudlyLearned(store.encode())
+        assertEquals(
+            listOf("LEARN discord.com tlsrec(sni+1) 10", "LEARN roblox.com split(sni) 0"),
+            restored.commands(now)
+        )
+    }
+
+    @Test
+    fun testLearnedDropsExpiredEntries() {
+        val now = 1_700_000_000_000L
+        val store = ShroudlyLearned("old.example tlsrec(sni+1) ${now - ShroudlyLearned.TTL_MS - 1}\nnew.example split(sni) $now")
+        assertEquals(listOf("LEARN new.example split(sni) 0"), store.commands(now))
+    }
 }

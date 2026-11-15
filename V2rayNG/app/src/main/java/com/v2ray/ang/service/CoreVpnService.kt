@@ -34,6 +34,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("VpnServicePolicy")
 class CoreVpnService : VpnService(), ServiceControl {
+    private companion object {
+        const val SHROUDLY_STOP_WAIT_MS = 2000L
+    }
+
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private var tun2SocksService: Tun2SocksControl? = null
@@ -121,11 +125,22 @@ class CoreVpnService : VpnService(), ServiceControl {
                 return
             }
             val (port, auth) = result
+            // Registers the receiver that handles stop/status requests; reports start success.
+            if (!CoreServiceManager.startShroudlyStandaloneControl()) {
+                stopAllService()
+                return
+            }
             runTun2socks(Tun2SocksTarget.Shroudly(port, auth.user, auth.pass))
 
             NotificationManager.showNotification(null)
-            MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_SUCCESS, "")
             return
+        }
+
+        // A Shroudly run left over from an earlier session (mode changed while it ran) would keep
+        // its port and threads; end it before starting xray without it.
+        if (shroudlyMode == AppConfig.SHROUDLY_MODE_OFF && ShroudlyEngine.isBusy) {
+            LogUtil.w(AppConfig.TAG, "StartCore-VPN: stopping leftover Shroudly engine")
+            ShroudlyEngine.stop(SHROUDLY_STOP_WAIT_MS)
         }
 
         if (shroudlyMode == AppConfig.SHROUDLY_MODE_CHAIN) {
@@ -394,7 +409,8 @@ class CoreVpnService : VpnService(), ServiceControl {
         isRunning = false
 
         if (ShroudlyEngine.isBusy || ShroudlyEngine.isRunning) {
-            ShroudlyEngine.stop()
+            // Bounded wait: the engine must release its port before a restart binds a new one.
+            ShroudlyEngine.stop(SHROUDLY_STOP_WAIT_MS)
         }
 
         tun2SocksService?.stopTun2Socks()

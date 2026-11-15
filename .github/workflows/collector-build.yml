@@ -97,6 +97,19 @@ jobs:
             echo "KS_PASS=$P" >> $GITHUB_ENV
           fi
 
+      - name: Unit tests and Kotlin compile (test branches)
+        if: github.ref != 'refs/heads/master'
+        working-directory: V2rayNG
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          chmod 755 gradlew
+          ./gradlew :app:compilePlaystoreDebugKotlin :app:testPlaystoreDebugUnitTest 2>&1 | tee "$RUNNER_TEMP/test.log"
+          code=${PIPESTATUS[0]}
+          if [ "$code" != "0" ]; then
+            grep -E "^e: |FAILED|What went wrong|Test.*>.*FAILED" -A3 "$RUNNER_TEMP/test.log" | head -40 | while IFS= read -r l; do echo "::error::$l"; done
+          fi
+          exit $code
+
       - name: Build APK
         working-directory: V2rayNG
         run: |

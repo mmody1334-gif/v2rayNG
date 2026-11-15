@@ -83,8 +83,7 @@ class MainViewModel(
             selectedGuid = dataSource.getSelectServer(),
             confirmRemove = dataSource.getConfirmRemove(),
             doubleColumnDisplay = dataSource.getDoubleColumnDisplay(),
-            shroudlyMode = dataSource.getShroudlyMode(),
-            shroudlyRunning = com.v2ray.ang.shroudly.ShroudlyEngine.isRunning
+            shroudlyMode = dataSource.getShroudlyMode()
         )
     )
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -117,34 +116,7 @@ class MainViewModel(
     // ---------- Service events ----------
     init {
         collectServiceEvents()
-        collectShroudlyEvents()
         setupGroupTab()
-    }
-
-    private fun collectShroudlyEvents() {
-        viewModelScope.launch {
-            com.v2ray.ang.shroudly.ShroudlyEngine.events.collect { event ->
-                when (event) {
-                    is com.v2ray.ang.shroudly.ShroudlyEvent.Ready -> _uiState.update { it.copy(shroudlyRunning = true) }
-                    is com.v2ray.ang.shroudly.ShroudlyEvent.Host -> {
-                        when (event.kind) {
-                            "bypass" -> _uiState.update { it.copy(shroudlyBypassCount = it.shroudlyBypassCount + 1) }
-                            "blocked" -> _uiState.update { it.copy(shroudlyBlockedCount = it.shroudlyBlockedCount + 1) }
-                        }
-                    }
-                    is com.v2ray.ang.shroudly.ShroudlyEvent.Stats -> {
-                        _uiState.update {
-                            it.copy(
-                                shroudlyBypassCount = if (event.desync > 0) event.desync.toInt() else it.shroudlyBypassCount,
-                                shroudlyBlockedCount = if (event.blocked > 0) event.blocked.toInt() else it.shroudlyBlockedCount
-                            )
-                        }
-                    }
-                    is com.v2ray.ang.shroudly.ShroudlyEvent.Error -> _uiState.update { it.copy(shroudlyLastError = event.message) }
-                    else -> {}
-                }
-            }
-        }
     }
 
     private fun collectServiceEvents() {
@@ -251,7 +223,7 @@ class MainViewModel(
     internal fun formatStatus(status: MainStatus): String = when (status) {
         MainStatus.Disconnected -> dataSource.getString(R.string.connection_not_connected)
         MainStatus.Connected -> {
-            if (_uiState.value.shroudlyMode == AppConfig.SHROUDLY_MODE_STANDALONE || _uiState.value.shroudlyRunning) {
+            if (_uiState.value.shroudlyMode == AppConfig.SHROUDLY_MODE_STANDALONE) {
                 dataSource.getString(R.string.shroudly_direct_connected)
             } else {
                 dataSource.getString(R.string.connection_connected)
@@ -337,8 +309,8 @@ class MainViewModel(
                 _uiState.update { it.copy(shareQRCodeBitmap = null) }
             }
 
-            MainAction.ToggleShroudlyStandalone -> {
-                toggleShroudlyStandalone()
+            MainAction.TurnOffShroudly -> {
+                turnOffShroudly()
             }
 
             MainAction.ToggleService,
@@ -379,21 +351,14 @@ class MainViewModel(
             it.copy(
                 confirmRemove = dataSource.getConfirmRemove(),
                 doubleColumnDisplay = dataSource.getDoubleColumnDisplay(),
-                shroudlyMode = dataSource.getShroudlyMode(),
-                shroudlyRunning = com.v2ray.ang.shroudly.ShroudlyEngine.isRunning
+                shroudlyMode = dataSource.getShroudlyMode()
             )
         }
     }
 
-    fun toggleShroudlyStandalone() {
-        val current = dataSource.getShroudlyMode()
-        val next = if (current == AppConfig.SHROUDLY_MODE_STANDALONE) {
-            AppConfig.SHROUDLY_MODE_OFF
-        } else {
-            AppConfig.SHROUDLY_MODE_STANDALONE
-        }
-        dataSource.setShroudlyMode(next)
-        _uiState.update { it.copy(shroudlyMode = next) }
+    fun turnOffShroudly() {
+        dataSource.setShroudlyMode(AppConfig.SHROUDLY_MODE_OFF)
+        _uiState.update { it.copy(shroudlyMode = AppConfig.SHROUDLY_MODE_OFF) }
     }
 
     // ---------- Group & server loading ----------
@@ -987,7 +952,6 @@ class MainViewModel(
             state.copy(
                 isRunning = running,
                 isTesting = testRequests.isTesting,
-                shroudlyRunning = com.v2ray.ang.shroudly.ShroudlyEngine.isRunning,
                 shroudlyMode = dataSource.getShroudlyMode(),
                 status = if (!clearTestingText && state.isRunning == running) state.status
                 else if (running) MainStatus.Connected else MainStatus.Disconnected

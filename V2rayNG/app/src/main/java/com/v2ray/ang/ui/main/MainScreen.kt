@@ -20,7 +20,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -221,14 +221,10 @@ fun MainScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
-                    if (uiState.shroudlyMode == AppConfig.SHROUDLY_MODE_STANDALONE) {
-                        ShroudlyStandaloneHeader(
-                            isRunning = isRunning,
-                            shroudlyRunning = uiState.shroudlyRunning,
-                            bypassCount = uiState.shroudlyBypassCount,
-                            blockedCount = uiState.shroudlyBlockedCount,
-                            lastError = uiState.shroudlyLastError,
-                            onToggle = { onAction(MainAction.ToggleShroudlyStandalone) },
+                    if (uiState.shroudlyMode != AppConfig.SHROUDLY_MODE_OFF) {
+                        ShroudlyModeBanner(
+                            mode = uiState.shroudlyMode,
+                            onTurnOff = { onAction(MainAction.TurnOffShroudly) },
                             onSettingsClick = { onNavigate(MainDestination.Shroudly) }
                         )
                     }
@@ -294,97 +290,61 @@ fun MainScreen(
 }
 
 @Composable
-private fun ShroudlyStandaloneHeader(
-    isRunning: Boolean,
-    shroudlyRunning: Boolean,
-    bypassCount: Int,
-    blockedCount: Int,
-    lastError: String?,
-    onToggle: () -> Unit,
+private fun ShroudlyModeBanner(
+    mode: String,
+    onTurnOff: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
+    val standalone = mode == AppConfig.SHROUDLY_MODE_STANDALONE
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_shroudly_shield_24dp),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(
+                        if (standalone) R.string.shroudly_banner_standalone_title
+                        else R.string.shroudly_banner_chain_title
+                    ),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(
+                    if (standalone) R.string.shroudly_banner_standalone_body
+                    else R.string.shroudly_banner_chain_body
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.End
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_shroudly_shield_24dp),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = stringResource(R.string.shroudly_chip_title),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        Text(
-                            text = stringResource(
-                                if (isRunning && shroudlyRunning) R.string.shroudly_engine_running
-                                else R.string.shroudly_engine_stopped
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                        )
-                    }
+                TextButton(onClick = onSettingsClick) {
+                    Text(stringResource(R.string.shroudly_banner_settings))
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_settings_24dp),
-                            contentDescription = stringResource(R.string.title_shroudly_settings),
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                TextButton(onClick = onTurnOff) {
+                    Text(
+                        stringResource(
+                            if (standalone) R.string.shroudly_banner_back_to_servers
+                            else R.string.shroudly_banner_turn_off_chain
                         )
-                    }
-                    IconButton(onClick = onToggle) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_stop_24dp),
-                            contentDescription = stringResource(R.string.shroudly_mode_off),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-            if (isRunning && shroudlyRunning) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.shroudly_stats_bypass, bypassCount),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = stringResource(R.string.shroudly_stats_blocked, blockedCount),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                if (!lastError.isNullOrEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.shroudly_last_error, lastError),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }

@@ -109,7 +109,7 @@ class MainActivity : HelperBaseComponentActivity() {
             onAction = { action ->
                 when (action) {
                     MainAction.ToggleService -> handleFabAction()
-                    MainAction.ToggleShroudlyStandalone -> {
+                    MainAction.TurnOffShroudly -> {
                         val wasRunning = mainViewModel.uiState.value.isRunning
                         mainViewModel.onAction(action)
                         if (wasRunning) {

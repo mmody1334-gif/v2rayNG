@@ -27,11 +27,7 @@ data class MainUiState(
     val confirmRemove: Boolean = false,
     val doubleColumnDisplay: Boolean = false,
     val shareQRCodeBitmap: android.graphics.Bitmap? = null,
-    val shroudlyMode: String = com.v2ray.ang.AppConfig.SHROUDLY_MODE_OFF,
-    val shroudlyRunning: Boolean = false,
-    val shroudlyBypassCount: Int = 0,
-    val shroudlyBlockedCount: Int = 0,
-    val shroudlyLastError: String? = null
+    val shroudlyMode: String = com.v2ray.ang.AppConfig.SHROUDLY_MODE_OFF
 )
 
 /**
@@ -41,7 +37,7 @@ sealed interface MainAction {
     data object Initialize : MainAction
     data object RefreshGroups : MainAction
     data object ToggleService : MainAction
-    data object ToggleShroudlyStandalone : MainAction
+    data object TurnOffShroudly : MainAction
     data object TestCurrentServer : MainAction
     data object TestAllServers : MainAction
     data object TestRealAllServers : MainAction

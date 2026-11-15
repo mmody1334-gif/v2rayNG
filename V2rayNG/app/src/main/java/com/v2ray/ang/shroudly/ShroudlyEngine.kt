@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import com.v2ray.ang.handler.SettingsManager
 import me.codeshare.shroudly.EngineNative
 import java.io.File
 import java.io.IOException
@@ -57,6 +58,14 @@ object ShroudlyEngine {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     val events: SharedFlow<ShroudlyEvent> = _events.asSharedFlow()
+
+    /* Loaded on the first start in this process; written back on every new "bypass". */
+    @Volatile private var learned: ShroudlyLearned? = null
+    // Not the object's monitor: start() holds that while it waits for the ready event.
+    private val learnedLock = Any()
+
+    private fun learnedStore(): ShroudlyLearned =
+        learned ?: ShroudlyLearned(SettingsManager.getShroudlyLearned()).also { learned = it }
 
     fun freePort(): Int = ServerSocket().use {
         it.reuseAddress = false
@@ -185,7 +194,23 @@ object ShroudlyEngine {
                     when (evObj) {
                         is ShroudlyEvent.Ready -> {
                             Log.i(TAG, "Engine ready on port ${evObj.port}")
+                            // Give back what earlier runs found, so known blocked sites open on
+                            // the first try instead of after a new search.
+                            val cmds = synchronized(learnedLock) { learnedStore().commands(System.currentTimeMillis()) }
+                            if (cmds.isNotEmpty()) {
+                                send(cmds.joinToString("\n"))
+                                Log.i(TAG, "Restored techniques for ${cmds.size} sites")
+                            }
                             readyLatch.countDown()
+                        }
+                        is ShroudlyEvent.Host -> {
+                            // "raw-" techniques belong to the desktop's Advanced engine only.
+                            if (evObj.kind == "bypass" && !evObj.strategy.startsWith("raw-")) {
+                                val text = synchronized(learnedLock) {
+                                    learnedStore().also { it.remember(evObj.host, evObj.strategy, System.currentTimeMillis()) }.encode()
+                                }
+                                SettingsManager.setShroudlyLearned(text)
+                            }
                         }
                         is ShroudlyEvent.Error -> {
                             lastError = evObj.message
