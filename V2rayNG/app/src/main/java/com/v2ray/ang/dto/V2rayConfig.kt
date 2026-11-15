@@ -82,6 +82,7 @@ data class V2rayConfig(
             var user: String? = null,
             var pass: String? = null,
             var headers: Map<String, String>? = null,
+            var servers: List<Any>? = null,
             /*VMess/VLESS*/
             var id: String? = null,
             var security: String? = null,

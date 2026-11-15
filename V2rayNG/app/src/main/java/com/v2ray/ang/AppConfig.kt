@@ -101,6 +101,7 @@ object AppConfig {
     const val SHROUDLY_MODE_CHAIN = "chain"
 
     const val SHROUDLY_STRATEGY_AUTO = "auto"
+    const val TAG_SHROUDLY_OUT = "shroudly-out"
 
     /** v2-collector published lists (GitHub "subs" branch). */
     const val COLLECTOR_BASE_URL = "https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/"

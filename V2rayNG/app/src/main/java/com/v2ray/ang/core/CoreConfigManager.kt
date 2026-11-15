@@ -162,6 +162,47 @@ object CoreConfigManager {
             }
         }
 
+        if (SettingsManager.getShroudlyMode() == AppConfig.SHROUDLY_MODE_CHAIN && com.v2ray.ang.shroudly.ShroudlyEngine.isRunning) {
+            val port = com.v2ray.ang.shroudly.ShroudlyEngine.currentPort
+            val auth = com.v2ray.ang.shroudly.ShroudlyEngine.currentAuth
+            if (port > 0 && auth != null && json.has("outbounds") && json.get("outbounds").isJsonArray) {
+                val outboundsArray = json.getAsJsonArray("outbounds")
+                if (outboundsArray.size() > 0) {
+                    val shroudlyJson = JsonObject().apply {
+                        addProperty("tag", AppConfig.TAG_SHROUDLY_OUT)
+                        addProperty("protocol", "socks")
+                        val settings = JsonObject()
+                        val servers = JsonArray()
+                        val server = JsonObject().apply {
+                            addProperty("address", AppConfig.LOOPBACK)
+                            addProperty("port", port)
+                            val users = JsonArray()
+                            users.add(JsonObject().apply {
+                                addProperty("user", auth.user)
+                                addProperty("pass", auth.pass)
+                                addProperty("level", 0)
+                            })
+                            add("users", users)
+                        }
+                        servers.add(server)
+                        settings.add("servers", servers)
+                        add("settings", settings)
+                    }
+                    outboundsArray.add(shroudlyJson)
+
+                    val firstOut = outboundsArray.get(0).asJsonObject
+                    val proto = firstOut.get("protocol")?.asString?.lowercase() ?: ""
+                    if (proto != "wireguard" && !proto.startsWith("hysteria")) {
+                        val stream = if (firstOut.has("streamSettings")) firstOut.getAsJsonObject("streamSettings") else JsonObject().also { firstOut.add("streamSettings", it) }
+                        val sockopt = if (stream.has("sockopt")) stream.getAsJsonObject("sockopt") else JsonObject().also { stream.add("sockopt", it) }
+                        if (!sockopt.has("dialerProxy")) {
+                            sockopt.addProperty("dialerProxy", AppConfig.TAG_SHROUDLY_OUT)
+                        }
+                    }
+                }
+            }
+        }
+
         return JsonUtil.toJsonPretty(json)?.let { ConfigResult(true, configContext.guid, it) } ?: result
     }
 
@@ -231,6 +272,7 @@ object CoreConfigManager {
         applyObservability(v2rayConfig, balancerStrategies)
         applySpeedDisabled(v2rayConfig)
         resolveOutboundDomainsToHosts(v2rayConfig)
+        applyShroudlyChainMode(v2rayConfig)
 
         return v2rayConfig
     }
@@ -462,6 +504,55 @@ object CoreConfigManager {
         v2rayConfig.stats = null
         v2rayConfig.policy = null
         v2rayConfig.outbounds.forEach { key -> key.mux = null }
+        v2rayConfig.outbounds.removeAll { it.tag == AppConfig.TAG_SHROUDLY_OUT }
+        v2rayConfig.outbounds.forEach { it.streamSettings?.sockopt?.dialerProxy = null }
+    }
+
+    private fun applyShroudlyChainMode(v2rayConfig: V2rayConfig) {
+        if (SettingsManager.getShroudlyMode() != AppConfig.SHROUDLY_MODE_CHAIN) return
+        if (!com.v2ray.ang.shroudly.ShroudlyEngine.isRunning) return
+
+        val port = com.v2ray.ang.shroudly.ShroudlyEngine.currentPort
+        val auth = com.v2ray.ang.shroudly.ShroudlyEngine.currentAuth
+        if (port <= 0 || auth == null) return
+
+        val shroudlyOutbound = V2rayConfig.OutboundBean(
+            tag = AppConfig.TAG_SHROUDLY_OUT,
+            protocol = "socks",
+            settings = V2rayConfig.OutboundBean.OutSettingsBean(
+                servers = listOf(
+                    mapOf(
+                        "address" to AppConfig.LOOPBACK,
+                        "port" to port,
+                        "users" to listOf(
+                            mapOf(
+                                "user" to auth.user,
+                                "pass" to auth.pass,
+                                "level" to 0
+                            )
+                        )
+                    )
+                )
+            ),
+            streamSettings = null,
+            mux = null
+        )
+
+        v2rayConfig.outbounds.add(shroudlyOutbound)
+
+        for (outbound in v2rayConfig.getAllProxyOutbound()) {
+            val proto = outbound.protocol.lowercase()
+            if (proto == "wireguard" || proto.startsWith("hysteria")) {
+                continue
+            }
+            val existingMask = outbound.streamSettings?.finalmask
+            if (existingMask is V2rayConfig.OutboundBean.StreamSettingsBean.FinalMaskBean.MaskBean && existingMask.type == "fragment") {
+                LogUtil.w(AppConfig.TAG, "Chain mode: skipping Shroudly on outbound '${outbound.tag}' due to existing xray fragment")
+                continue
+            }
+
+            outbound.ensureSockopt().dialerProxy = AppConfig.TAG_SHROUDLY_OUT
+        }
     }
 
     /**

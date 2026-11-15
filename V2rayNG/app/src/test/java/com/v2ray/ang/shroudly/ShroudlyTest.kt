@@ -89,4 +89,47 @@ class ShroudlyTest {
         val textEv = ShroudlyEvent.parse(rawText)
         assertTrue(textEv is ShroudlyEvent.Text)
     }
+
+    @Test
+    fun testChainModeOutboundSerialization() {
+        val shroudlyOutbound = com.v2ray.ang.dto.V2rayConfig.OutboundBean(
+            tag = com.v2ray.ang.AppConfig.TAG_SHROUDLY_OUT,
+            protocol = "socks",
+            settings = com.v2ray.ang.dto.V2rayConfig.OutboundBean.OutSettingsBean(
+                servers = listOf(
+                    mapOf(
+                        "address" to "127.0.0.1",
+                        "port" to 15555,
+                        "users" to listOf(
+                            mapOf(
+                                "user" to "user1",
+                                "pass" to "pass1",
+                                "level" to 0
+                            )
+                        )
+                    )
+                )
+            ),
+            streamSettings = null,
+            mux = null
+        )
+
+        val json = com.v2ray.ang.util.JsonUtil.toJson(shroudlyOutbound)
+        assertTrue(json.contains("shroudly-out"))
+        assertTrue(json.contains("socks"))
+        assertTrue(json.contains("127.0.0.1"))
+        assertTrue(json.contains("15555"))
+        assertTrue(json.contains("user1"))
+        assertTrue(json.contains("pass1"))
+
+        val proxyOutbound = com.v2ray.ang.dto.V2rayConfig.OutboundBean(
+            tag = "proxy",
+            protocol = "vless"
+        )
+        proxyOutbound.ensureSockopt().dialerProxy = com.v2ray.ang.AppConfig.TAG_SHROUDLY_OUT
+
+        val proxyJson = com.v2ray.ang.util.JsonUtil.toJson(proxyOutbound)
+        assertTrue(proxyJson.contains("dialerProxy"))
+        assertTrue(proxyJson.contains("shroudly-out"))
+    }
 }

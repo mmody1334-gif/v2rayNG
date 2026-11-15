@@ -115,45 +115,26 @@ class CoreVpnService : VpnService(), ServiceControl {
         val shroudlyMode = SettingsManager.getShroudlyMode()
         if (shroudlyMode == AppConfig.SHROUDLY_MODE_STANDALONE) {
             LogUtil.i(AppConfig.TAG, "StartCore-VPN: Starting in Shroudly standalone mode")
-            val auth = SocksAuth.random()
-            val authFile = File(filesDir, "shroudly-auth")
-            try {
-                auth.writeTo(authFile)
-            } catch (e: Exception) {
-                LogUtil.e(AppConfig.TAG, "Failed to write Shroudly auth file", e)
-                MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_FAILURE, "Failed to create Shroudly auth")
+            val result = startShroudlyEngine()
+            if (result == null) {
                 stopAllService()
                 return
             }
-
-            val port = ShroudlyEngine.freePort()
-            val blockIps = ShroudlyEngine.readBlockIps(this)
-            val strategy = SettingsManager.getShroudlyStrategy()
-            val quicOff = SettingsManager.getShroudlyQuicOff()
-
-            val started = ShroudlyEngine.start(
-                port = port,
-                authFile = authFile,
-                blockIps = blockIps,
-                strategy = strategy,
-                auto = strategy.equals(AppConfig.SHROUDLY_STRATEGY_AUTO, ignoreCase = true),
-                quicOff = quicOff
-            )
-
-            if (!started) {
-                val err = ShroudlyEngine.lastError ?: "Failed to start Shroudly engine"
-                LogUtil.e(AppConfig.TAG, "StartCore-VPN: $err")
-                MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_FAILURE, err)
-                stopAllService()
-                return
-            }
-
-            ShroudlyEngine.setAuth(auth)
+            val (port, auth) = result
             runTun2socks(Tun2SocksTarget.Shroudly(port, auth.user, auth.pass))
 
             NotificationManager.showNotification(null)
             MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_SUCCESS, "")
             return
+        }
+
+        if (shroudlyMode == AppConfig.SHROUDLY_MODE_CHAIN) {
+            LogUtil.i(AppConfig.TAG, "StartCore-VPN: Starting in Shroudly chain mode")
+            val result = startShroudlyEngine()
+            if (result == null) {
+                stopAllService()
+                return
+            }
         }
 
         if (!CoreServiceManager.startCoreLoop(mInterface)) {
@@ -181,6 +162,42 @@ class CoreVpnService : VpnService(), ServiceControl {
     override fun attachBaseContext(newBase: Context?) {
         val context = newBase?.let(AppLocaleManager::localizedContext)
         super.attachBaseContext(context)
+    }
+
+    private fun startShroudlyEngine(): Pair<Int, SocksAuth>? {
+        val auth = SocksAuth.random()
+        val authFile = File(filesDir, "shroudly-auth")
+        try {
+            auth.writeTo(authFile)
+        } catch (e: Exception) {
+            LogUtil.e(AppConfig.TAG, "Failed to write Shroudly auth file", e)
+            MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_FAILURE, "Failed to create Shroudly auth")
+            return null
+        }
+
+        val port = ShroudlyEngine.freePort()
+        val blockIps = ShroudlyEngine.readBlockIps(this)
+        val strategy = SettingsManager.getShroudlyStrategy()
+        val quicOff = SettingsManager.getShroudlyQuicOff()
+
+        val started = ShroudlyEngine.start(
+            port = port,
+            authFile = authFile,
+            blockIps = blockIps,
+            strategy = strategy,
+            auto = strategy.equals(AppConfig.SHROUDLY_STRATEGY_AUTO, ignoreCase = true),
+            quicOff = quicOff
+        )
+
+        if (!started) {
+            val err = ShroudlyEngine.lastError ?: "Failed to start Shroudly engine"
+            LogUtil.e(AppConfig.TAG, "StartCore-VPN: $err")
+            MessageHelper.sendMsg2UI(this, AppConfig.MSG_STATE_START_FAILURE, err)
+            return null
+        }
+
+        ShroudlyEngine.setAuth(auth)
+        return Pair(port, auth)
     }
 
     /**
