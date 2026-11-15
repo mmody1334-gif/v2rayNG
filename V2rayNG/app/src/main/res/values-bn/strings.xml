@@ -564,4 +564,24 @@
     <string name="sub_info_open_page">সাবস্ক্রিপশন তথ্যের পাতা খুলুন</string>
     <string name="sub_info_unlimited">সীমাহীন</string>
 
+    <string name="title_shroudly_settings">Shroudly (DPI বাইপাস)</string>
+    <string name="shroudly_chip_title">🛡️ সার্ভার ছাড়া সরাসরি বাইপাস</string>
+    <string name="shroudly_direct_connected">Shroudly — সরাসরি সংযোগ</string>
+    <string name="shroudly_mode_title">Shroudly মোড</string>
+    <string name="shroudly_mode_off">বন্ধ</string>
+    <string name="shroudly_mode_standalone">স্বতন্ত্র (সার্ভার ছাড়া)</string>
+    <string name="shroudly_mode_chain">সার্ভার ছদ্মবেশ (চেইন)</string>
+    <string name="shroudly_strategy_title">বাইপাস কৌশল</string>
+    <string name="shroudly_quic_title">QUIC নিষ্ক্রিয় করুন</string>
+    <string name="shroudly_quic_summary">DPI বাইপাস প্রয়োগের জন্য TCP বাধ্য করুন</string>
+    <string name="shroudly_license_title">MIT লাইসেন্স এবং সোর্স কোড</string>
+    <string name="shroudly_credits">Shroudly ইঞ্জিন দ্বারা চালিত (MIT লাইসেন্স)</string>
+    <string name="shroudly_disclaimer">দ্রষ্টব্য: Shroudly আপনার IP বা দেশ পরিবর্তন করে না এবং IP-স্তরের ব্লক বাইপাস করে না। এটি সরাসরি DPI (SNI পরিদর্শন) বাইপাস করে।</string>
+    <string name="shroudly_stats_bypass">বাইপাস হয়েছে: %1$d</string>
+    <string name="shroudly_stats_blocked">ব্লক হয়েছে: %1$d</string>
+    <string name="shroudly_stats_title">ইঞ্জিন পরিসংখ্যান</string>
+    <string name="shroudly_last_error">সর্বশেষ ত্রুটি: %1$s</string>
+    <string name="shroudly_engine_running">ইঞ্জিন চালু আছে</string>
+    <string name="shroudly_engine_stopped">ইঞ্জিন বন্ধ আছে</string>
+    <string name="shroudly_not_supported">এই ডিভাইসের ABI-তে Shroudly সমর্থিত নয়</string>
 </resources>

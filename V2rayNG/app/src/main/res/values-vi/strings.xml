@@ -562,4 +562,24 @@
     <string name="sub_info_open_page">Mở trang thông tin đăng ký</string>
     <string name="sub_info_unlimited">Không giới hạn</string>
 
+    <string name="title_shroudly_settings">Shroudly (Vượt qua DPI)</string>
+    <string name="shroudly_chip_title">🛡️ Vượt chặn không cần máy chủ</string>
+    <string name="shroudly_direct_connected">Shroudly — Kết nối trực tiếp</string>
+    <string name="shroudly_mode_title">Chế độ Shroudly</string>
+    <string name="shroudly_mode_off">Tắt</string>
+    <string name="shroudly_mode_standalone">Độc lập (Không máy chủ)</string>
+    <string name="shroudly_mode_chain">Ngụy trang máy chủ (Chuỗi)</string>
+    <string name="shroudly_strategy_title">Chiến lược né tránh</string>
+    <string name="shroudly_quic_title">Tắt QUIC</string>
+    <string name="shroudly_quic_summary">Bắt buộc dùng TCP để áp dụng kỹ thuật vượt DPI</string>
+    <string name="shroudly_license_title">Giấy phép MIT &amp; Mã nguồn</string>
+    <string name="shroudly_credits">Được hỗ trợ bởi công cụ Shroudly (Giấy phép MIT)</string>
+    <string name="shroudly_disclaimer">Lưu ý: Shroudly không đổi IP hoặc quốc gia của bạn và không vượt chặn theo IP. Nó trực tiếp vượt qua kiểm tra DPI (SNI).</string>
+    <string name="shroudly_stats_bypass">Đã vượt qua: %1$d</string>
+    <string name="shroudly_stats_blocked">Bị chặn: %1$d</string>
+    <string name="shroudly_stats_title">Thống kê công cụ</string>
+    <string name="shroudly_last_error">Lỗi gần nhất: %1$s</string>
+    <string name="shroudly_engine_running">Công cụ đang chạy</string>
+    <string name="shroudly_engine_stopped">Công cụ đã dừng</string>
+    <string name="shroudly_not_supported">Shroudly không được hỗ trợ trên ABI thiết bị này</string>
 </resources>

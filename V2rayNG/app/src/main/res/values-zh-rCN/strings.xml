@@ -562,4 +562,24 @@
     <string name="sub_info_open_page">打开订阅信息页面</string>
     <string name="sub_info_unlimited">无限制</string>
 
+    <string name="title_shroudly_settings">Shroudly (DPI 绕过)</string>
+    <string name="shroudly_chip_title">🛡️ 无需服务器直连绕过</string>
+    <string name="shroudly_direct_connected">Shroudly — 直连</string>
+    <string name="shroudly_mode_title">Shroudly 模式</string>
+    <string name="shroudly_mode_off">关闭</string>
+    <string name="shroudly_mode_standalone">独立模式 (无需服务器)</string>
+    <string name="shroudly_mode_chain">服务器伪装模式 (链式代理)</string>
+    <string name="shroudly_strategy_title">绕过策略</string>
+    <string name="shroudly_quic_title">禁用 QUIC</string>
+    <string name="shroudly_quic_summary">强制走 TCP 以便应用 DPI 绕过技术</string>
+    <string name="shroudly_license_title">MIT 许可证与源码</string>
+    <string name="shroudly_credits">基于 Shroudly 引擎驱动 (MIT 许可证)</string>
+    <string name="shroudly_disclaimer">注意：Shroudly 不会更改您的 IP 地址或国家/地区，也不会绕过 IP 级别的封锁。它直接绕过 DPI (SNI 检查)。</string>
+    <string name="shroudly_stats_bypass">已绕过: %1$d</string>
+    <string name="shroudly_stats_blocked">已拦截: %1$d</string>
+    <string name="shroudly_stats_title">引擎统计</string>
+    <string name="shroudly_last_error">最近错误: %1$s</string>
+    <string name="shroudly_engine_running">引擎运行中</string>
+    <string name="shroudly_engine_stopped">引擎已停止</string>
+    <string name="shroudly_not_supported">此设备架构不支持 Shroudly</string>
 </resources>

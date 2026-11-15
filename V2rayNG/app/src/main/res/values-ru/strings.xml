@@ -568,4 +568,24 @@
     <string name="sub_info_open_page">Открыть страницу подписки</string>
     <string name="sub_info_unlimited">Без ограничений</string>
 
+    <string name="title_shroudly_settings">Shroudly (Обход DPI)</string>
+    <string name="shroudly_chip_title">🛡️ Обход без сервера</string>
+    <string name="shroudly_direct_connected">Shroudly — Прямое подключение</string>
+    <string name="shroudly_mode_title">Режим Shroudly</string>
+    <string name="shroudly_mode_off">Выкл</string>
+    <string name="shroudly_mode_standalone">Автономный (без сервера)</string>
+    <string name="shroudly_mode_chain">Маскировка сервера (Chain)</string>
+    <string name="shroudly_strategy_title">Стратегия обхода</string>
+    <string name="shroudly_quic_title">Отключить QUIC</string>
+    <string name="shroudly_quic_summary">Принудительный TCP для работы обхода DPI</string>
+    <string name="shroudly_license_title">Лицензия MIT и исходный код</string>
+    <string name="shroudly_credits">Работает на движке Shroudly (Лицензия MIT)</string>
+    <string name="shroudly_disclaimer">Примечание: Shroudly не меняет IP-адрес или страну и не обходит блокировки по IP. Он обходит проверку DPI (SNI) напрямую.</string>
+    <string name="shroudly_stats_bypass">Обойдено: %1$d</string>
+    <string name="shroudly_stats_blocked">Заблокировано: %1$d</string>
+    <string name="shroudly_stats_title">Статистика движка</string>
+    <string name="shroudly_last_error">Последняя ошибка: %1$s</string>
+    <string name="shroudly_engine_running">Движок работает</string>
+    <string name="shroudly_engine_stopped">Движок остановлен</string>
+    <string name="shroudly_not_supported">Shroudly не поддерживается на этом ABI устройства</string>
 </resources>

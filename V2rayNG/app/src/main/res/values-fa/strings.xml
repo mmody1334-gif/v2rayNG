@@ -564,4 +564,24 @@
     <string name="sub_info_open_page">باز کردن صفحه اطلاعات اشتراک</string>
     <string name="sub_info_unlimited">نامحدود</string>
 
+    <string name="title_shroudly_settings">Shroudly (دور زدن فیلترینگ DPI)</string>
+    <string name="shroudly_chip_title">🛡️ دور زدن فیلتر بدون سرور</string>
+    <string name="shroudly_direct_connected">Shroudly — اتصال مستقیم</string>
+    <string name="shroudly_mode_title">حالت Shroudly</string>
+    <string name="shroudly_mode_off">خاموش</string>
+    <string name="shroudly_mode_standalone">مستقل (بدون سرور)</string>
+    <string name="shroudly_mode_chain">استتار سرور (زنجیره ای)</string>
+    <string name="shroudly_strategy_title">راهبرد فرار از فیلتر</string>
+    <string name="shroudly_quic_title">غیرفعال کردن QUIC</string>
+    <string name="shroudly_quic_summary">اجبار به استفاده از TCP برای اعمال فیلترشکنی DPI</string>
+    <string name="shroudly_license_title">مجوز MIT و کد منبع</string>
+    <string name="shroudly_credits">قدرت گرفته از موتور Shroudly (مجوز MIT)</string>
+    <string name="shroudly_disclaimer">توجه: Shroudly آدرس IP یا کشور شما را تغییر نمی دهد و انسدادهای سطح IP را دور نمی زند. این ابزار مستقیماً فیلترینگ DPI (بازرسی SNI) را دور می زند.</string>
+    <string name="shroudly_stats_bypass">دور زده شده: %1$d</string>
+    <string name="shroudly_stats_blocked">مسدود شده: %1$d</string>
+    <string name="shroudly_stats_title">آمار موتور</string>
+    <string name="shroudly_last_error">آخرین خطا: %1$s</string>
+    <string name="shroudly_engine_running">موتور در حال اجرا</string>
+    <string name="shroudly_engine_stopped">موتور متوقف شد</string>
+    <string name="shroudly_not_supported">موتور Shroudly در این معماری دستگاه پشتیبانی نمی شود</string>
 </resources>
