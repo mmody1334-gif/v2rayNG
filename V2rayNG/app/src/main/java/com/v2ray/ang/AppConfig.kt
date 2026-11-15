@@ -92,6 +92,15 @@ object AppConfig {
     const val PREF_COLLECTOR_AUTO_CLEAN = "pref_collector_auto_clean"
     const val PREF_BLOCK_IPV6_LEAK = "pref_block_ipv6_leak"
     const val PREF_COLLECTOR_AUTO_CLEAN_LAST = "pref_collector_auto_clean_last"
+    const val PREF_SHROUDLY_MODE = "pref_shroudly_mode"
+    const val PREF_SHROUDLY_STRATEGY = "pref_shroudly_strategy"
+    const val PREF_SHROUDLY_QUIC_OFF = "pref_shroudly_quic_off"
+
+    const val SHROUDLY_MODE_OFF = "off"
+    const val SHROUDLY_MODE_STANDALONE = "standalone"
+    const val SHROUDLY_MODE_CHAIN = "chain"
+
+    const val SHROUDLY_STRATEGY_AUTO = "auto"
 
     /** v2-collector published lists (GitHub "subs" branch). */
     const val COLLECTOR_BASE_URL = "https://raw.githubusercontent.com/mmody1334-gif/v2-collector/subs/"

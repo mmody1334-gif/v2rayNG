@@ -1,0 +1,47 @@
+package me.codeshare.shroudly
+
+/*
+ * From Shroudly (https://github.com/umutxyp/Shroudly) - MIT License.
+ *
+ * The engine inside this app's process: libshroudlycore_jni.so, built from
+ * third_party/Shroudly/core/src.
+ */
+object EngineNative {
+    const val LIBRARY = "shroudlycore_jni"
+
+    /* Codes run() returns that come from the JNI side, not from the engine. */
+    const val BUSY = -100
+    const val NO_MEMORY = -101
+
+    /* Why the library cannot be used, or null once it is loaded. */
+    val loadError: String? by lazy {
+        try {
+            System.loadLibrary(LIBRARY)
+            null
+        } catch (e: Throwable) {
+            e.toString()
+        }
+    }
+
+    /* The engine's whole run, on the calling thread, as the shroudly-core
+     * program would make it with these arguments: commands are read from
+     * commandFd, JSON lines written to eventFd. Both descriptors belong to
+     * the native side from the call on, and are closed when it returns,
+     * which is when the engine has stopped (STOP, or commandFd closed). The
+     * result is the program's exit code, or BUSY when another run has not
+     * returned yet. */
+    @JvmStatic external fun run(args: Array<String>, commandFd: Int, eventFd: Int): Int
+
+    /* Datagrams apps sent through the tunnel that reached the engine's UDP
+     * relay this run, or -1 when it cannot be read. Read directly, not from
+     * STATS, which comes only every 10 seconds while nothing looks. */
+    @JvmStatic private external fun udpIn(): Long
+
+    fun udpInOrNone(): Long = try { udpIn() } catch (_: Throwable) { -1L }
+
+    /* Connections the engine was asked for this run, or -1: read directly,
+     * as udpIn. */
+    @JvmStatic private external fun connsIn(): Long
+
+    fun connsInOrNone(): Long = try { connsIn() } catch (_: Throwable) { -1L }
+}
